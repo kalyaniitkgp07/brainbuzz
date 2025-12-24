@@ -2,18 +2,18 @@ import React, { useState } from 'react';
 import { useGame, ALL_GAMES } from '../context/GameContext';
 
 export default function Admin() {
-    const { questions, addQuestion, removeQuestion, enabledGames, toggleGame } = useGame();
+    const { questions, addQuestion, bulkAddQuestions, removeQuestion, clearQuestions, enabledGames, toggleGame } = useGame();
     const [activeGame, setActiveGame] = useState('ClueDown');
 
     // Form States
-    const [clueDownForm, setClueDownForm] = useState({ hints: ['', '', ''], answer: '', image: '' });
+    const [clueDownForm, setClueDownForm] = useState({ title: '', hints: ['', '', ''], answer: '', image: '' });
     const [categoryChaosForm, setCategoryChaosForm] = useState({ category: '', items: '' });
 
     const handleAddClueDown = (e) => {
         e.preventDefault();
         if (clueDownForm.answer && clueDownForm.hints.every(h => h)) {
             addQuestion('ClueDown', clueDownForm);
-            setClueDownForm({ hints: ['', '', ''], answer: '', image: '' });
+            setClueDownForm({ title: '', hints: ['', '', ''], answer: '', image: '' });
         }
     };
 
@@ -26,6 +26,25 @@ export default function Admin() {
             });
             setCategoryChaosForm({ category: '', items: '' });
         }
+    };
+
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                if (!Array.isArray(data)) throw new Error("JSON must be an array of questions.");
+
+                // Final validation could be added here based on activeGame
+                bulkAddQuestions(activeGame, data);
+            } catch (err) {
+                alert("Failed to load JSON: " + err.message);
+            }
+        };
+        reader.readAsText(file);
     };
 
     return (
@@ -52,20 +71,35 @@ export default function Admin() {
             {/* 2. Question Editor */}
             <div className="md:col-span-2 space-y-8">
                 <div className="bg-slate-800 p-8 rounded-3xl shadow-xl border-b-8 border-yellow-500">
-                    <div className="flex justify-between items-center mb-8">
-                        <h2 className="text-3xl font-black text-yellow-400 uppercase">Question Editor</h2>
-                        <select
-                            value={activeGame}
-                            onChange={(e) => setActiveGame(e.target.value)}
-                            className="bg-slate-900 text-white p-3 rounded-xl border-2 border-slate-700 outline-none focus:border-yellow-400"
-                        >
-                            <option value="ClueDown">ClueDown</option>
-                            <option value="CategoryChaos">CategoryChaos</option>
-                        </select>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                        <div>
+                            <h2 className="text-3xl font-black text-yellow-400 uppercase">Question Editor</h2>
+                            <p className="text-slate-500 text-sm italic">Add individually or bulk upload</p>
+                        </div>
+                        <div className="flex gap-3 w-full sm:w-auto">
+                            <label className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold cursor-pointer transition-all text-center flex items-center justify-center gap-2">
+                                📤 Bulk Upload
+                                <input type="file" accept=".json" onChange={handleFileUpload} className="hidden" />
+                            </label>
+                            <select
+                                value={activeGame}
+                                onChange={(e) => setActiveGame(e.target.value)}
+                                className="flex-1 sm:flex-none bg-slate-900 text-white p-2 rounded-xl border-2 border-slate-700 outline-none focus:border-yellow-400"
+                            >
+                                <option value="ClueDown">ClueDown</option>
+                                <option value="CategoryChaos">CategoryChaos</option>
+                            </select>
+                        </div>
                     </div>
 
                     {activeGame === 'ClueDown' && (
                         <form onSubmit={handleAddClueDown} className="space-y-6">
+                            <input
+                                placeholder="Question Title (Optional - e.g. Category, Era)"
+                                value={clueDownForm.title}
+                                onChange={(e) => setClueDownForm({ ...clueDownForm, title: e.target.value })}
+                                className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                            />
                             <div className="grid grid-cols-1 gap-4">
                                 {clueDownForm.hints.map((hint, i) => (
                                     <input
@@ -128,7 +162,21 @@ export default function Admin() {
 
                 {/* 3. Questions List */}
                 <div className="bg-slate-800 p-8 rounded-3xl shadow-xl border-b-8 border-green-500">
-                    <h2 className="text-2xl font-black mb-6 text-green-400 uppercase">Existing Questions ({activeGame})</h2>
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-black text-green-400 uppercase">Existing Questions ({activeGame})</h2>
+                        {(questions[activeGame] || []).length > 0 && (
+                            <button
+                                onClick={() => {
+                                    if (window.confirm(`Are you sure you want to delete ALL questions for ${activeGame}? This cannot be undone.`)) {
+                                        clearQuestions(activeGame);
+                                    }
+                                }}
+                                className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all uppercase shadow-lg"
+                            >
+                                🗑️ Delete All
+                            </button>
+                        )}
+                    </div>
                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                         {(questions[activeGame] || []).length === 0 && <p className="text-slate-500 italic">No questions added yet.</p>}
                         {(questions[activeGame] || []).map((q) => (

@@ -34,10 +34,24 @@ export function GameProvider({ children }) {
         }));
     };
 
+    const bulkAddQuestions = (game, questionList) => {
+        setQuestions(prev => ({
+            ...prev,
+            [game]: questionList.map((q, idx) => ({ ...q, id: idx + 1 }))
+        }));
+    };
+
     const removeQuestion = (game, id) => {
         setQuestions(prev => ({
             ...prev,
             [game]: prev[game].filter(q => q.id !== id)
+        }));
+    };
+
+    const clearQuestions = (game) => {
+        setQuestions(prev => ({
+            ...prev,
+            [game]: []
         }));
     };
 
@@ -56,7 +70,9 @@ export function GameProvider({ children }) {
             enabledGames,
             setEnabledGames,
             addQuestion,
+            bulkAddQuestions,
             removeQuestion,
+            clearQuestions,
             toggleGame,
             ALL_GAMES
         }}>

@@ -3,6 +3,7 @@ export const GAMES = ["ClueDown", "Fast Fingers", "Category Chaos", "The Final F
 export const QUESTIONS = [
     {
         id: 1,
+        title: "Transportation",
         hints: [
             "My design was patented by James Knibbs in 1867.",
             "I am a simple machine used for transport.",
@@ -13,6 +14,7 @@ export const QUESTIONS = [
     },
     {
         id: 2,
+        title: "Inventions",
         hints: [
             "Joseph Swan and Thomas Edison perfected me.",
             "I used to rely on a tungsten filament to glow.",

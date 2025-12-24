@@ -62,35 +62,43 @@ export default function ClueDown() {
 
             {/* QUESTION VIEW */}
             {view === 'question' && (
-                <div className="w-full max-w-5xl h-[600px] bg-slate-800 rounded-3xl p-12 flex flex-col justify-between shadow-2xl relative border-b-8 border-blue-500 overflow-hidden">
-                    <div className="relative z-10">
-                        <h3 className="text-blue-400 text-2xl font-bold mb-8 italic uppercase tracking-widest">Question {currentQuestion.id} of {QUESTIONS.length}</h3>
-                        <div className="space-y-6">
+                <div className="w-full max-w-5xl h-[700px] bg-slate-800 rounded-3xl p-10 flex flex-col shadow-2xl relative border-b-8 border-blue-500 overflow-hidden">
+                    <div className="relative z-10 flex flex-col h-full">
+                        <div className="flex-none">
+                            {currentQuestion.title && (
+                                <div className="bg-yellow-400 text-slate-900 px-4 py-1 rounded-full text-sm font-black uppercase mb-4 w-fit shadow-md">
+                                    {currentQuestion.title}
+                                </div>
+                            )}
+                            <h3 className="text-blue-400 text-2xl font-bold mb-6 italic uppercase tracking-widest">Question {currentQuestion.id} of {QUESTIONS.length}</h3>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto pr-4 space-y-6 custom-scrollbar mb-8">
                             {currentQuestion.hints.map((hint, i) => (
                                 <div
                                     key={i}
-                                    className={`text-3xl p-6 rounded-2xl border-2 transition-all duration-700 ${hintLevel > i ? 'opacity-100 translate-x-0 border-yellow-400 bg-slate-700 shadow-lg' : 'opacity-0 -translate-x-20 pointer-events-none'}`}
+                                    className={`text-2xl p-6 rounded-2xl border-2 transition-all duration-700 ${hintLevel > i ? 'opacity-100 translate-x-0 border-yellow-400 bg-slate-700 shadow-lg' : 'opacity-0 -translate-x-20 pointer-events-none'}`}
                                 >
                                     <span className="text-yellow-400 mr-4 font-black">{i + 1}.</span> {hint}
                                 </div>
                             ))}
                         </div>
-                    </div>
 
-                    <div className="flex justify-between items-center relative z-10">
-                        <button
-                            onClick={nextHint}
-                            disabled={hintLevel >= 3}
-                            className={`px-8 py-4 rounded-xl font-bold text-xl transition-all ${hintLevel >= 3 ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg active:scale-95 uppercase'}`}
-                        >
-                            Next Hint
-                        </button>
-                        <button
-                            onClick={() => setView('answer')}
-                            className="bg-green-500 hover:bg-green-400 text-white px-12 py-4 rounded-xl font-black text-2xl shadow-xl active:scale-95 uppercase"
-                        >
-                            REVEAL ANSWER
-                        </button>
+                        <div className="flex-none flex justify-between items-center bg-slate-800/90 pt-4 border-t border-slate-700">
+                            <button
+                                onClick={nextHint}
+                                disabled={hintLevel >= 3}
+                                className={`px-8 py-4 rounded-xl font-bold text-xl transition-all ${hintLevel >= 3 ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg active:scale-95 uppercase'}`}
+                            >
+                                Next Hint
+                            </button>
+                            <button
+                                onClick={() => setView('answer')}
+                                className="bg-green-500 hover:bg-green-400 text-white px-12 py-4 rounded-xl font-black text-2xl shadow-xl active:scale-95 uppercase"
+                            >
+                                REVEAL ANSWER
+                            </button>
+                        </div>
                     </div>
 
                     <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
