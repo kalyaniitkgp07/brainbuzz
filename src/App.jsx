@@ -15,9 +15,9 @@ function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Lobby />} />
-            <Route path="cluedown" element={<ClueDown />} />
+            <Route path="cluedown/:id?" element={<ClueDown />} />
             <Route path="fast-fingers" element={<FastFingers />} />
-            <Route path="category-chaos" element={<CategoryChaos />} />
+            <Route path="category-chaos/:id?" element={<CategoryChaos />} />
             <Route path="the-final-face-off" element={<FinalFaceOff />} />
             <Route path="admin" element={<Admin />} />
           </Route>

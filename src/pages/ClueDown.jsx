@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 
 export default function ClueDown() {
     const { questions } = useGame();
+    const { id } = useParams();
     const QUESTIONS = questions.ClueDown || [];
     const [view, setView] = useState('rules');
     const [currentQIndex, setCurrentQIndex] = useState(0);
@@ -12,10 +13,23 @@ export default function ClueDown() {
 
     const currentQuestion = QUESTIONS[currentQIndex];
 
+    useEffect(() => {
+        if (id && QUESTIONS.length > 0) {
+            const index = QUESTIONS.findIndex(q => q.id === parseInt(id));
+            if (index !== -1) {
+                setCurrentQIndex(index);
+                setView('question');
+                if (hintLevel === 0) setHintLevel(1);
+            }
+        } else if (!id) {
+            setView('rules');
+            setHintLevel(0);
+        }
+    }, [id, QUESTIONS]);
+
     const showQuestion = (index) => {
-        setCurrentQIndex(index);
-        setHintLevel(1);
-        setView('question');
+        const questionId = QUESTIONS[index]?.id;
+        if (questionId) navigate(`/cluedown/${questionId}`);
     };
 
     const nextHint = () => {

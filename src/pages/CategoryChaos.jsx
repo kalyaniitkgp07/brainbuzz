@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 
 export default function CategoryChaos() {
     const { questions } = useGame();
+    const { id } = useParams();
     const QUESTIONS = questions.CategoryChaos || [];
     const [view, setView] = useState('rules'); // rules, game
     const [currentQIndex, setCurrentQIndex] = useState(0);
@@ -12,11 +13,23 @@ export default function CategoryChaos() {
 
     const currentQuestion = QUESTIONS[currentQIndex];
 
+    useEffect(() => {
+        if (id && QUESTIONS.length > 0) {
+            const index = QUESTIONS.findIndex(q => q.id === parseInt(id));
+            if (index !== -1) {
+                setCurrentQIndex(index);
+                setView('game');
+                setRevealedCount(0);
+            }
+        } else if (!id) {
+            setView('rules');
+        }
+    }, [id, QUESTIONS]);
+
     const handleNextQuestion = () => {
         if (currentQIndex < QUESTIONS.length - 1) {
-            setCurrentQIndex(currentQIndex + 1);
-            setRevealedCount(0);
-            setView('game');
+            const nextId = QUESTIONS[currentQIndex + 1]?.id;
+            if (nextId) navigate(`/category-chaos/${nextId}`);
         } else {
             navigate('/');
         }
@@ -47,7 +60,10 @@ export default function CategoryChaos() {
                     </p>
                     <div className="flex justify-center">
                         <button
-                            onClick={() => { setView('game'); setRevealedCount(0); }}
+                            onClick={() => {
+                                const firstId = QUESTIONS[0]?.id;
+                                if (firstId) navigate(`/category-chaos/${firstId}`);
+                            }}
                             className="bg-purple-500 text-white px-12 py-4 rounded-full text-3xl font-black hover:bg-purple-400 transition-all shadow-xl uppercase"
                         >
                             Start Game
