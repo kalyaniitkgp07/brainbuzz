@@ -13,14 +13,23 @@ export default function Header() {
                     Brain Buzz
                 </span>
             </Link>
-            {!isLobby && (
+            <div className="flex gap-4 items-center">
                 <Link
-                    to="/"
-                    className="bg-yellow-400 text-slate-900 px-6 py-2 rounded-full font-bold hover:bg-yellow-300 transition-colors flex items-center gap-2"
+                    to="/admin"
+                    className="p-2 text-slate-400 hover:text-yellow-400 transition-colors"
+                    title="Admin"
                 >
-                    🏠 Home
+                    ⚙️
                 </Link>
-            )}
+                {!isLobby && (
+                    <Link
+                        to="/"
+                        className="bg-yellow-400 text-slate-900 px-6 py-2 rounded-full font-bold hover:bg-yellow-300 transition-colors flex items-center gap-2"
+                    >
+                        🏠 Home
+                    </Link>
+                )}
+            </div>
         </header>
     );
 }

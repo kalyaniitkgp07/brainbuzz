@@ -1,0 +1,74 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { QUESTIONS as defaultClueDownQuestions } from '../data/gameData';
+
+const GameContext = createContext();
+
+export const ALL_GAMES = ["ClueDown", "Fast Fingers", "Category Chaos", "The Final Face-Off"];
+
+export function GameProvider({ children }) {
+    const [questions, setQuestions] = useState(() => {
+        const saved = localStorage.getItem('bb_questions_v2');
+        return saved ? JSON.parse(saved) : {
+            ClueDown: defaultClueDownQuestions,
+            CategoryChaos: []
+        };
+    });
+
+    const [enabledGames, setEnabledGames] = useState(() => {
+        const saved = localStorage.getItem('bb_enabled_games');
+        return saved ? JSON.parse(saved) : ["ClueDown"]; // Default to just ClueDown
+    });
+
+    useEffect(() => {
+        localStorage.setItem('bb_questions_v2', JSON.stringify(questions));
+    }, [questions]);
+
+    useEffect(() => {
+        localStorage.setItem('bb_enabled_games', JSON.stringify(enabledGames));
+    }, [enabledGames]);
+
+    const addQuestion = (game, question) => {
+        setQuestions(prev => ({
+            ...prev,
+            [game]: [...(prev[game] || []), { ...question, id: (prev[game]?.length || 0) + 1 }]
+        }));
+    };
+
+    const removeQuestion = (game, id) => {
+        setQuestions(prev => ({
+            ...prev,
+            [game]: prev[game].filter(q => q.id !== id)
+        }));
+    };
+
+    const toggleGame = (game) => {
+        setEnabledGames(prev =>
+            prev.includes(game)
+                ? prev.filter(g => g !== game)
+                : [...prev, game]
+        );
+    };
+
+    return (
+        <GameContext.Provider value={{
+            questions,
+            setQuestions,
+            enabledGames,
+            setEnabledGames,
+            addQuestion,
+            removeQuestion,
+            toggleGame,
+            ALL_GAMES
+        }}>
+            {children}
+        </GameContext.Provider>
+    );
+}
+
+export function useGame() {
+    const context = useContext(GameContext);
+    if (!context) {
+        throw new Error('useGame must be used within a GameProvider');
+    }
+    return context;
+}

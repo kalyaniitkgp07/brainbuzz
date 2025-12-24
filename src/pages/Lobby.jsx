@@ -1,30 +1,33 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { GAMES } from '../data/gameData';
+import { useGame, ALL_GAMES } from '../context/GameContext';
 
 export default function Lobby() {
-    return (
-        <div className="text-center animate-fade-in">
-            <h1 className="text-6xl font-black mb-12 text-yellow-400 tracking-tighter uppercase">Quiz Show Lobby</h1>
-            <div className="grid grid-cols-1 gap-6 w-96">
-                {GAMES.map((game, i) => {
-                    const path = game.toLowerCase().replace(/\s+/g, '-');
-                    const isAvailable = i === 0; // Only ClueDown is available for now
+    const { enabledGames } = useGame();
 
-                    return isAvailable ? (
+    return (
+        <div className="text-center animate-fade-in w-full max-w-4xl">
+            <h1 className="text-6xl font-black mb-12 text-yellow-400 tracking-tighter uppercase drop-shadow-2xl">Quiz Show Lobby</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {ALL_GAMES.map((game, i) => {
+                    const path = game.toLowerCase().replace(/\s+/g, '-');
+                    const isEnabled = enabledGames.includes(game);
+
+                    return isEnabled ? (
                         <Link
                             key={game}
                             to={`/${path}`}
-                            className="p-6 text-2xl font-bold rounded-xl border-4 border-yellow-400 bg-yellow-400 text-slate-900 hover:scale-105 transition-all text-center"
+                            className="p-8 text-3xl font-black rounded-3xl border-4 border-yellow-400 bg-yellow-400 text-slate-900 hover:scale-105 hover:rotate-1 shadow-2xl transition-all text-center flex items-center justify-center min-h-[160px]"
                         >
                             {game}
                         </Link>
                     ) : (
                         <div
                             key={game}
-                            className="p-6 text-2xl font-bold rounded-xl border-4 border-slate-700 text-slate-500 cursor-not-allowed text-center"
+                            className="p-8 text-3xl font-black rounded-3xl border-4 border-slate-700 bg-slate-800/50 text-slate-600 cursor-not-allowed text-center flex flex-col items-center justify-center min-h-[160px] opacity-50"
                         >
-                            {game} (Locked)
+                            <span>{game}</span>
+                            <span className="text-xs uppercase tracking-widest mt-2 font-bold opacity-30">Disabled by Admin</span>
                         </div>
                     );
                 })}
