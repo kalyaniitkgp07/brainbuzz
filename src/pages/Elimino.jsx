@@ -5,8 +5,8 @@ import QuestionTracker from '../components/QuestionTracker';
 import confetti from 'canvas-confetti';
 
 const SOUNDS = {
-    correct: '/audio/correct.mp3',
-    wrong: '/audio/wrong.mp3'
+    correct: `${import.meta.env.BASE_URL}audio/correct.mp3`,
+    wrong: `${import.meta.env.BASE_URL}audio/wrong.mp3`
 };
 
 export default function Elimino() {

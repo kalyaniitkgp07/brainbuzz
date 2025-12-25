@@ -8,7 +8,7 @@ export default function Header() {
     return (
         <header className="w-full bg-slate-800 border-b-4 border-yellow-500 p-4 flex justify-between items-center shadow-xl fixed top-0 left-0 z-50">
             <Link to="/" className="flex items-center gap-3">
-                <img src="/brain_buzz.svg" alt="Brain Buzz Logo" className="w-10 h-10" />
+                <img src={`${import.meta.env.BASE_URL}brain_buzz.svg`} alt="Brain Buzz Logo" className="w-10 h-10" />
                 <span className="text-3xl font-black text-yellow-400 tracking-tighter uppercase">
                     Brain Buzz
                 </span>
