@@ -8,6 +8,7 @@ export default function Admin() {
 
     // Form States
     const [clueDownForm, setClueDownForm] = useState({ title: '', hints: ['', '', ''], answer: '', image: '' });
+    const [mindSnapForm, setMindSnapForm] = useState({ question: '', question_image: '', clue: '', answer: '', answer_image: '' });
     const [categoryChaosForm, setCategoryChaosForm] = useState({ category: '', items: '' });
 
     const handleAddClueDown = (e) => {
@@ -20,6 +21,19 @@ export default function Admin() {
                 addQuestion('ClueDown', clueDownForm);
             }
             setClueDownForm({ title: '', hints: ['', '', ''], answer: '', image: '' });
+        }
+    };
+
+    const handleAddMindSnap = (e) => {
+        e.preventDefault();
+        if (mindSnapForm.question && mindSnapForm.answer) {
+            if (editingId) {
+                updateQuestion('MindSnap', editingId, mindSnapForm);
+                setEditingId(null);
+            } else {
+                addQuestion('MindSnap', mindSnapForm);
+            }
+            setMindSnapForm({ question: '', question_image: '', clue: '', answer: '', answer_image: '' });
         }
     };
 
@@ -52,6 +66,14 @@ export default function Admin() {
                 answer: q.answer,
                 image: q.image || ''
             });
+        } else if (activeGame === 'MindSnap') {
+            setMindSnapForm({
+                question: q.question,
+                question_image: q.question_image || '',
+                clue: q.clue || '',
+                answer: q.answer,
+                answer_image: q.answer_image || ''
+            });
         } else {
             setCategoryChaosForm({
                 category: q.category,
@@ -63,6 +85,7 @@ export default function Admin() {
     const cancelEdit = () => {
         setEditingId(null);
         setClueDownForm({ title: '', hints: ['', '', ''], answer: '', image: '' });
+        setMindSnapForm({ question: '', question_image: '', clue: '', answer: '', answer_image: '' });
         setCategoryChaosForm({ category: '', items: '' });
     };
 
@@ -111,7 +134,7 @@ export default function Admin() {
                 <div className="bg-slate-800 p-8 rounded-3xl shadow-xl border-b-8 border-yellow-500">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                         <div>
-                            <h2 className="text-3xl font-black text-yellow-400 uppercase">Question Editor</h2>
+                            <h2 className="text-3xl font-black text-yellow-400 uppercase">{activeGame} Editor</h2>
                             <p className="text-slate-500 text-sm italic">Add individually or bulk upload</p>
                         </div>
                         <div className="flex gap-3 w-full sm:w-auto items-end">
@@ -128,6 +151,7 @@ export default function Admin() {
                                     className="bg-slate-900 text-white p-2 rounded-xl border-2 border-slate-700 outline-none focus:border-yellow-400 h-[42px] w-full"
                                 >
                                     <option value="ClueDown">ClueDown</option>
+                                    <option value="MindSnap">MindSnap</option>
                                     <option value="CategoryChaos">CategoryChaos</option>
                                 </select>
                             </div>
@@ -191,6 +215,81 @@ export default function Admin() {
                             <div className="flex gap-4">
                                 <button className={`flex-1 ${editingId ? 'bg-blue-600 hover:bg-blue-500' : 'bg-yellow-400 hover:bg-yellow-300'} text-slate-900 py-4 rounded-xl font-black text-xl transition-all uppercase`}>
                                     {editingId ? 'Update ClueDown Question' : 'Add ClueDown Question'}
+                                </button>
+                                {editingId && (
+                                    <button
+                                        type="button"
+                                        onClick={cancelEdit}
+                                        className="flex-1 bg-slate-700 text-white py-4 rounded-xl font-black text-xl hover:bg-slate-600 transition-all uppercase"
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
+                        </form>
+                    )}
+
+                    {activeGame === 'MindSnap' && (
+                        <form onSubmit={handleAddMindSnap} className="space-y-6">
+                            <div>
+                                <label htmlFor="snap-question" className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Riddle / Question</label>
+                                <textarea
+                                    id="snap-question"
+                                    placeholder="Enter the riddle here..."
+                                    value={mindSnapForm.question}
+                                    onChange={(e) => setMindSnapForm({ ...mindSnapForm, question: e.target.value })}
+                                    className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none min-h-[100px]"
+                                    required
+                                />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="snap-q-image" className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Question Image URL (Optional)</label>
+                                    <input
+                                        id="snap-q-image"
+                                        placeholder="https://example.com/riddle.jpg"
+                                        value={mindSnapForm.question_image}
+                                        onChange={(e) => setMindSnapForm({ ...mindSnapForm, question_image: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="snap-clue" className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Clue (Optional)</label>
+                                    <input
+                                        id="snap-clue"
+                                        placeholder="A little hint..."
+                                        value={mindSnapForm.clue}
+                                        onChange={(e) => setMindSnapForm({ ...mindSnapForm, clue: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="snap-answer" className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Answer</label>
+                                    <input
+                                        id="snap-answer"
+                                        placeholder="The correct answer"
+                                        value={mindSnapForm.answer}
+                                        onChange={(e) => setMindSnapForm({ ...mindSnapForm, answer: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="snap-a-image" className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Answer Image URL (Optional)</label>
+                                    <input
+                                        id="snap-a-image"
+                                        placeholder="https://example.com/answer.jpg"
+                                        value={mindSnapForm.answer_image}
+                                        onChange={(e) => setMindSnapForm({ ...mindSnapForm, answer_image: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex gap-4">
+                                <button className={`flex-1 ${editingId ? 'bg-blue-600 hover:bg-blue-500' : 'bg-yellow-400 hover:bg-yellow-300'} text-slate-900 py-4 rounded-xl font-black text-xl transition-all uppercase`}>
+                                    {editingId ? 'Update MindSnap Riddle' : 'Add MindSnap Riddle'}
                                 </button>
                                 {editingId && (
                                     <button

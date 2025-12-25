@@ -1,15 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { QUESTIONS as defaultClueDownQuestions } from '../data/gameData';
+import { QUESTIONS as defaultClueDownQuestions, MIND_SNAP_QUESTIONS as defaultMindSnapQuestions } from '../data/gameData';
 
 const GameContext = createContext();
 
-export const ALL_GAMES = ["ClueDown", "Fast Fingers", "Category Chaos", "The Final Face-Off"];
+export const ALL_GAMES = ["ClueDown", "MindSnap", "Category Chaos", "The Final Face-Off"];
 
 export function GameProvider({ children }) {
     const [questions, setQuestions] = useState(() => {
         const saved = localStorage.getItem('bb_questions_v2');
         return saved ? JSON.parse(saved) : {
             ClueDown: defaultClueDownQuestions,
+            MindSnap: defaultMindSnapQuestions,
             CategoryChaos: []
         };
     });

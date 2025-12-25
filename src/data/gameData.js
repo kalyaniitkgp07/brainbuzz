@@ -23,4 +23,21 @@ export const QUESTIONS = [
         answer: "The Lightbulb",
         image: "https://images.unsplash.com/photo-1543051932-6ef9fec6cb80?auto=format&fit=crop&w=400&q=80"
     },
+    {
+        id: 3,
+        title: "Category: Literature",
+        hints: ["Famous playwright", "Wrote 'Romeo and Juliet'", "Born in Stratford-upon-Avon"],
+        answer: "William Shakespeare",
+        image: "https://upload.wikimedia.org/wikipedia/commons/a/a2/Shakespeare.jpg"
+    }
+];
+
+export const MIND_SNAP_QUESTIONS = [
+    {
+        id: 1,
+        question: "What has 13 hearts, but no lungs, feet or bellybuttons?",
+        clue: "You might find it in a casino or a magic trick.",
+        answer: "A deck of cards.",
+        answer_image: "https://images.unsplash.com/photo-1543332145-6e8de5e00344?q=80&w=1000&auto=format&fit=crop"
+    }
 ];

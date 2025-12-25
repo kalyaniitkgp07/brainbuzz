@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Layout from './components/Layout';
 import Lobby from './pages/Lobby';
 import ClueDown from './pages/ClueDown';
-import FastFingers from './pages/FastFingers';
+import MindSnap from './pages/MindSnap';
 import CategoryChaos from './pages/CategoryChaos';
 import FinalFaceOff from './pages/FinalFaceOff';
 import Admin from './pages/Admin';
@@ -23,7 +23,12 @@ function App() {
               <Route path="answer/:id" element={<ClueDown />} />
             </Route>
 
-            <Route path="fast-fingers" element={<FastFingers />} />
+            <Route path="mindsnap">
+              <Route index element={<Navigate to="rules" replace />} />
+              <Route path="rules" element={<MindSnap />} />
+              <Route path="question/:id" element={<MindSnap />} />
+              <Route path="answer/:id" element={<MindSnap />} />
+            </Route>
 
             <Route path="category-chaos">
               <Route index element={<CategoryChaos />} />
