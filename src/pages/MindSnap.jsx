@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
+import QuestionTracker from '../components/QuestionTracker';
 
 export default function MindSnap() {
-    const { questions } = useGame();
+    const { questions, visitedQuestions, markAsVisited, resetVisited } = useGame();
     const { id } = useParams();
     const { pathname } = useLocation();
     const QUESTIONS = questions.MindSnap || [];
@@ -26,7 +27,11 @@ export default function MindSnap() {
                 setShowClue(false);
             }
         }
-    }, [id, QUESTIONS]);
+
+        if (isQuestion && currentQuestion) {
+            markAsVisited('MindSnap', currentQuestion.id);
+        }
+    }, [id, QUESTIONS, isQuestion, currentQuestion]);
 
     const showQuestion = (index) => {
         const questionId = QUESTIONS[index]?.id;
@@ -52,22 +57,33 @@ export default function MindSnap() {
         <div className="w-full flex flex-col items-center animate-fade-in">
             {/* RULES VIEW */}
             {isRules && (
-                <div className="max-w-4xl w-full bg-slate-800 p-12 rounded-3xl shadow-2xl border-b-8 border-yellow-500">
-                    <h2 className="text-5xl font-black mb-8 text-yellow-400 uppercase tracking-tight">Rules: MindSnap</h2>
-                    <p className="text-2xl text-slate-300 mb-8">Test your logic and lateral thinking with these brain-teasing riddles!</p>
-                    <ul className="text-2xl space-y-4 mb-12">
-                        <li>🧩 <span className="text-yellow-400 font-bold">Riddle:</span> Read the question carefully.</li>
-                        <li>💡 <span className="text-blue-400 font-bold">Clue:</span> Use the clue if you're stuck (optional).</li>
-                        <li>🏆 <span className="text-green-400 font-bold">Goal:</span> Solve it before revealing the answer!</li>
-                    </ul>
-                    <div className="flex justify-center">
-                        <button
-                            onClick={() => showQuestion(0)}
-                            className="bg-yellow-400 text-slate-900 px-12 py-4 rounded-full text-3xl font-black hover:bg-yellow-300 transition-all shadow-xl uppercase"
-                        >
-                            START GAME
-                        </button>
+                <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-slate-800 p-12 rounded-[40px] shadow-2xl border-b-8 border-yellow-500 flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-5xl font-black mb-8 text-yellow-400 uppercase tracking-tight">Rules: MindSnap</h2>
+                            <p className="text-2xl text-slate-300 mb-8">Test your logic and lateral thinking with these brain-teasing riddles!</p>
+                            <ul className="text-2xl space-y-4 mb-12">
+                                <li>🧩 <span className="text-yellow-400 font-bold">Riddle:</span> Read the question carefully.</li>
+                                <li>💡 <span className="text-blue-400 font-bold">Clue:</span> Use the clue if you're stuck (optional).</li>
+                                <li>🏆 <span className="text-green-400 font-bold">Goal:</span> Solve it before revealing the answer!</li>
+                            </ul>
+                        </div>
+                        <div className="flex justify-center">
+                            <button
+                                onClick={() => showQuestion(0)}
+                                className="w-full bg-yellow-400 text-slate-900 px-12 py-6 rounded-[30px] text-3xl font-black hover:bg-yellow-300 transition-all shadow-[0_15px_30px_rgba(251,191,36,0.3)] uppercase active:scale-95"
+                            >
+                                START GAME
+                            </button>
+                        </div>
                     </div>
+
+                    <QuestionTracker
+                        game="MindSnap"
+                        questions={QUESTIONS}
+                        visitedIds={visitedQuestions.MindSnap || []}
+                        onReset={() => resetVisited('MindSnap')}
+                    />
                 </div>
             )}
 
@@ -143,16 +159,10 @@ export default function MindSnap() {
                         </div>
 
                         <button
-                            onClick={() => {
-                                if (currentQIndex < QUESTIONS.length - 1) {
-                                    showQuestion(currentQIndex + 1);
-                                } else {
-                                    navigate('/');
-                                }
-                            }}
+                            onClick={() => navigate('/mindsnap/rules')}
                             className="bg-green-500 text-white px-12 py-5 rounded-2xl font-black text-2xl hover:bg-green-400 active:scale-95 transition-all shadow-xl uppercase w-full max-w-md"
                         >
-                            {currentQIndex < QUESTIONS.length - 1 ? 'Next Riddle →' : 'Finish Game 🏠'}
+                            Return to Rules & Tracker →
                         </button>
                     </div>
                 </div>

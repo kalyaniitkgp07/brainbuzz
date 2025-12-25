@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
+import QuestionTracker from '../components/QuestionTracker';
 
 export default function FlashTrack() {
-    const { questions } = useGame();
+    const { questions, visitedQuestions, markAsVisited, resetVisited } = useGame();
     const { id } = useParams();
     const { pathname } = useLocation();
     const navigate = useNavigate();
@@ -28,7 +29,11 @@ export default function FlashTrack() {
             const idx = QUESTIONS.findIndex(q => q.id === parseInt(id));
             if (idx !== -1) setCurrentQIndex(idx);
         }
-    }, [id, QUESTIONS]);
+
+        if (isQuestion && currentQuestion) {
+            markAsVisited('FlashTrack', currentQuestion.id);
+        }
+    }, [id, QUESTIONS, isQuestion, currentQuestion]);
 
     // Handle reveal logic
     useEffect(() => {
@@ -86,28 +91,39 @@ export default function FlashTrack() {
 
     if (isRules) {
         return (
-            <div className="max-w-4xl mx-auto p-8 bg-slate-900/50 backdrop-blur-xl rounded-[40px] border-2 border-slate-800 shadow-2xl mt-10">
-                <h1 className="text-6xl font-black text-yellow-400 mb-8 uppercase italic tracking-tighter text-center">FlashTrack</h1>
-                <div className="space-y-6 text-xl text-slate-300">
-                    <p className="flex items-center gap-4 bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
-                        <span className="bg-yellow-400 text-slate-900 w-10 h-10 rounded-full flex items-center justify-center font-black">1</span>
-                        Identify the subject from a fast-paced media mix!
-                    </p>
-                    <p className="flex items-center gap-4 bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
-                        <span className="bg-yellow-400 text-slate-900 w-10 h-10 rounded-full flex items-center justify-center font-black">2</span>
-                        Watch the video or listen to the audio carefully.
-                    </p>
-                    <p className="flex items-center gap-4 bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
-                        <span className="bg-yellow-400 text-slate-900 w-10 h-10 rounded-full flex items-center justify-center font-black">3</span>
-                        Images will reveal sequentially as the media plays.
-                    </p>
+            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
+                <div className="p-8 bg-slate-900/50 backdrop-blur-xl rounded-[40px] border-2 border-slate-800 shadow-2xl flex flex-col justify-between">
+                    <div>
+                        <h1 className="text-6xl font-black text-yellow-400 mb-8 uppercase italic tracking-tighter text-center">FlashTrack</h1>
+                        <div className="space-y-6 text-xl text-slate-300 mb-8">
+                            <p className="flex items-center gap-4 bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
+                                <span className="bg-yellow-400 text-slate-900 w-10 h-10 rounded-full flex items-center justify-center font-black">1</span>
+                                Identify the subject from a fast-paced media mix!
+                            </p>
+                            <p className="flex items-center gap-4 bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
+                                <span className="bg-yellow-400 text-slate-900 w-10 h-10 rounded-full flex items-center justify-center font-black">2</span>
+                                Watch the video or listen to the audio carefully.
+                            </p>
+                            <p className="flex items-center gap-4 bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
+                                <span className="bg-yellow-400 text-slate-900 w-10 h-10 rounded-full flex items-center justify-center font-black">3</span>
+                                Images will reveal sequentially as the media plays.
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => navigate(`/flashtrack/question/${currentQuestion.id}`)}
+                        className="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-black py-6 rounded-3xl text-3xl transition-all hover:scale-105 shadow-[0_0_30px_rgba(251,191,36,0.3)] uppercase"
+                    >
+                        Start Round
+                    </button>
                 </div>
-                <button
-                    onClick={() => navigate(`/flashtrack/question/${currentQuestion.id}`)}
-                    className="w-full mt-10 bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-black py-6 rounded-3xl text-3xl transition-all hover:scale-105 shadow-[0_0_30px_rgba(251,191,36,0.3)] uppercase"
-                >
-                    Start Round
-                </button>
+
+                <QuestionTracker
+                    game="FlashTrack"
+                    questions={QUESTIONS}
+                    visitedIds={visitedQuestions.FlashTrack || []}
+                    onReset={() => resetVisited('FlashTrack')}
+                />
             </div>
         );
     }
@@ -215,14 +231,10 @@ export default function FlashTrack() {
 
                         <div className="pt-4">
                             <button
-                                onClick={() => {
-                                    const nextQ = QUESTIONS[currentQIndex + 1];
-                                    if (nextQ) navigate(`/flashtrack/question/${nextQ.id}`);
-                                    else navigate('/');
-                                }}
-                                className="w-full bg-yellow-400 text-slate-900 px-10 py-5 rounded-3xl font-black text-2xl hover:bg-yellow-300 transition-all hover:scale-105 shadow-[0_0_30px_rgba(251,191,36,0.2)] uppercase"
+                                onClick={() => navigate('/flashtrack/rules')}
+                                className="flex-1 bg-green-500 text-white px-8 py-5 rounded-2xl font-black text-2xl hover:bg-green-400 active:scale-95 transition-all shadow-xl uppercase"
                             >
-                                {QUESTIONS[currentQIndex + 1] ? 'Next Round' : 'Finish Game'}
+                                Return to Rules & Tracker →
                             </button>
                         </div>
                     </div>

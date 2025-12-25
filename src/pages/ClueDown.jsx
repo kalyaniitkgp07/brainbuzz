@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
+import QuestionTracker from '../components/QuestionTracker';
 
 export default function ClueDown() {
-    const { questions } = useGame();
+    const { questions, visitedQuestions, markAsVisited, resetVisited } = useGame();
     const { id } = useParams();
     const { pathname } = useLocation();
     const QUESTIONS = questions.ClueDown || [];
@@ -28,7 +29,11 @@ export default function ClueDown() {
         } else if (isRules) {
             setHintLevel(0);
         }
-    }, [id, QUESTIONS, isRules]);
+
+        if (isQuestion && currentQuestion) {
+            markAsVisited('ClueDown', currentQuestion.id);
+        }
+    }, [id, QUESTIONS, isRules, isQuestion, currentQuestion]);
 
     const showQuestion = (index) => {
         const questionId = QUESTIONS[index]?.id;
@@ -58,22 +63,33 @@ export default function ClueDown() {
         <div className="w-full flex flex-col items-center animate-fade-in">
             {/* RULES VIEW */}
             {isRules && (
-                <div className="max-w-4xl w-full bg-slate-800 p-12 rounded-3xl shadow-2xl border-b-8 border-yellow-500">
-                    <h2 className="text-5xl font-black mb-8 text-yellow-400 uppercase tracking-tight">Rules: ClueDown</h2>
-                    <ul className="text-2xl space-y-6 mb-12">
-                        <li>🎯 <span className="text-yellow-400 font-bold">Goal:</span> Guess the object in 3 hints.</li>
-                        <li>🏆 <span className="text-green-400 font-bold">20 pts:</span> Answer after Hint 1</li>
-                        <li>🏆 <span className="text-blue-400 font-bold">15 pts:</span> Answer after Hint 2</li>
-                        <li>🏆 <span className="text-orange-400 font-bold">10 pts:</span> Answer after Hint 3</li>
-                    </ul>
-                    <div className="flex justify-center">
-                        <button
-                            onClick={() => showQuestion(0)}
-                            className="bg-yellow-400 text-slate-900 px-12 py-4 rounded-full text-3xl font-black hover:bg-yellow-300 transition-all shadow-xl uppercase"
-                        >
-                            START GAME
-                        </button>
+                <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-slate-800 p-12 rounded-[40px] shadow-2xl border-b-8 border-yellow-500 flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-5xl font-black mb-8 text-yellow-400 uppercase tracking-tight">Rules: ClueDown</h2>
+                            <ul className="text-2xl space-y-6 mb-12">
+                                <li>🎯 <span className="text-yellow-400 font-bold">Goal:</span> Guess the object in 3 hints.</li>
+                                <li>🏆 <span className="text-green-400 font-bold">20 pts:</span> Answer after Hint 1</li>
+                                <li>🏆 <span className="text-blue-400 font-bold">15 pts:</span> Answer after Hint 2</li>
+                                <li>🏆 <span className="text-orange-400 font-bold">10 pts:</span> Answer after Hint 3</li>
+                            </ul>
+                        </div>
+                        <div className="flex justify-center">
+                            <button
+                                onClick={() => showQuestion(0)}
+                                className="w-full bg-yellow-400 text-slate-900 px-12 py-6 rounded-[30px] text-3xl font-black hover:bg-yellow-300 transition-all shadow-[0_15px_30px_rgba(251,191,36,0.3)] uppercase active:scale-95"
+                            >
+                                START GAME
+                            </button>
+                        </div>
                     </div>
+
+                    <QuestionTracker
+                        game="ClueDown"
+                        questions={QUESTIONS}
+                        visitedIds={visitedQuestions.ClueDown || []}
+                        onReset={() => resetVisited('ClueDown')}
+                    />
                 </div>
             )}
 
@@ -150,16 +166,10 @@ export default function ClueDown() {
 
                         <div className="flex gap-4 relative z-10 w-full">
                             <button
-                                onClick={() => {
-                                    if (currentQIndex < QUESTIONS.length - 1) {
-                                        showQuestion(currentQIndex + 1);
-                                    } else {
-                                        navigate('/');
-                                    }
-                                }}
+                                onClick={() => navigate('/cluedown/rules')}
                                 className="flex-1 bg-green-500 text-white px-8 py-5 rounded-2xl font-black text-2xl hover:bg-green-400 active:scale-95 transition-all shadow-xl uppercase"
                             >
-                                {currentQIndex < QUESTIONS.length - 1 ? 'Next Question →' : 'Finish Game 🏠'}
+                                Return to Rules & Tracker →
                             </button>
                         </div>
                     </div>

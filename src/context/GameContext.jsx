@@ -31,6 +31,11 @@ export function GameProvider({ children }) {
         return saved ? JSON.parse(saved) : ["ClueDown"]; // Default to just ClueDown
     });
 
+    const [visitedQuestions, setVisitedQuestions] = useState(() => {
+        const saved = localStorage.getItem('bb_visited_questions');
+        return saved ? JSON.parse(saved) : {};
+    });
+
     useEffect(() => {
         localStorage.setItem('bb_questions_v2', JSON.stringify(questions));
     }, [questions]);
@@ -38,6 +43,10 @@ export function GameProvider({ children }) {
     useEffect(() => {
         localStorage.setItem('bb_enabled_games', JSON.stringify(enabledGames));
     }, [enabledGames]);
+
+    useEffect(() => {
+        localStorage.setItem('bb_visited_questions', JSON.stringify(visitedQuestions));
+    }, [visitedQuestions]);
 
     const addQuestion = (game, question) => {
         setQuestions(prev => ({
@@ -74,6 +83,20 @@ export function GameProvider({ children }) {
         }));
     };
 
+    const resetVisited = (game) => {
+        setVisitedQuestions(prev => ({
+            ...prev,
+            [game]: []
+        }));
+    };
+
+    const markAsVisited = (game, id) => {
+        setVisitedQuestions(prev => ({
+            ...prev,
+            [game]: [...new Set([...(prev[game] || []), id])]
+        }));
+    };
+
     const toggleGame = (game) => {
         setEnabledGames(prev =>
             prev.includes(game)
@@ -94,6 +117,9 @@ export function GameProvider({ children }) {
             removeQuestion,
             clearQuestions,
             toggleGame,
+            visitedQuestions,
+            markAsVisited,
+            resetVisited,
             ALL_GAMES
         }}>
             {children}

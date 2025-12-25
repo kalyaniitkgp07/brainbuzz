@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
+import QuestionTracker from '../components/QuestionTracker';
 import confetti from 'canvas-confetti';
 
 const SOUNDS = {
@@ -9,7 +10,7 @@ const SOUNDS = {
 };
 
 export default function Elimino() {
-    const { questions } = useGame();
+    const { questions, visitedQuestions, markAsVisited, resetVisited } = useGame();
     const { id } = useParams();
     const { pathname, state } = useLocation();
     const QUESTIONS = questions.Elimino || [];
@@ -35,7 +36,11 @@ export default function Elimino() {
                 setIsProcessing(false);
             }
         }
-    }, [id, QUESTIONS]);
+
+        if (isQuestion && currentQuestion) {
+            markAsVisited('Elimino', currentQuestion.id);
+        }
+    }, [id, QUESTIONS, isQuestion, currentQuestion]);
 
     const playSound = (type) => {
         const audio = new Audio(SOUNDS[type]);
@@ -116,21 +121,32 @@ export default function Elimino() {
         <div className="w-full max-w-5xl animate-fade-in py-12 flex flex-col items-center">
             {/* RULES VIEW */}
             {isRules && (
-                <div className="bg-slate-800 p-12 rounded-3xl shadow-2xl border-b-8 border-purple-500 w-full text-center">
-                    <h2 className="text-5xl font-black mb-8 text-purple-400 uppercase tracking-tight">Rules: Elimino</h2>
-                    <div className="text-2xl mb-12 text-slate-300 space-y-6">
-                        <p>Pick the correct answer from four options!</p>
-                        <ul className="text-left max-w-md mx-auto space-y-4 bg-slate-900/50 p-6 rounded-2xl border-2 border-slate-700">
-                            <li>💡 <span className="text-white font-bold">50/50:</span> You can eliminate two wrong options if you're stuck.</li>
-                            <li>🏆 <span className="text-green-400 font-bold">Goal:</span> Identify the one true answer.</li>
-                        </ul>
+                <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-slate-800 p-12 rounded-[40px] shadow-2xl border-b-8 border-purple-500 flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-5xl font-black mb-8 text-purple-400 uppercase tracking-tight">Rules: Elimino</h2>
+                            <div className="text-2xl mb-12 text-slate-300 space-y-6">
+                                <p>Pick the correct answer from four options!</p>
+                                <ul className="text-left max-w-md mx-auto space-y-4 bg-slate-900/50 p-6 rounded-2xl border-2 border-slate-700">
+                                    <li>💡 <span className="text-white font-bold">50/50:</span> You can eliminate two wrong options if you're stuck.</li>
+                                    <li>🏆 <span className="text-green-400 font-bold">Goal:</span> Identify the one true answer.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => showQuestion(0)}
+                            className="w-full bg-purple-500 text-white px-12 py-6 rounded-[30px] text-3xl font-black hover:bg-purple-400 transition-all shadow-[0_15px_30px_rgba(168,85,247,0.3)] uppercase active:scale-95"
+                        >
+                            Start Game
+                        </button>
                     </div>
-                    <button
-                        onClick={() => showQuestion(0)}
-                        className="bg-purple-500 text-white px-12 py-4 rounded-full text-3xl font-black hover:bg-purple-400 transition-all shadow-xl uppercase"
-                    >
-                        Start Game
-                    </button>
+
+                    <QuestionTracker
+                        game="Elimino"
+                        questions={QUESTIONS}
+                        visitedIds={visitedQuestions.Elimino || []}
+                        onReset={() => resetVisited('Elimino')}
+                    />
                 </div>
             )}
 
@@ -202,16 +218,10 @@ export default function Elimino() {
                         )}
 
                         <button
-                            onClick={() => {
-                                if (currentQIndex < QUESTIONS.length - 1) {
-                                    showQuestion(currentQIndex + 1);
-                                } else {
-                                    navigate('/');
-                                }
-                            }}
+                            onClick={() => navigate('/elimino/rules')}
                             className="bg-green-500 hover:bg-green-400 text-white px-16 py-5 rounded-2xl font-black text-3xl shadow-xl transition-all uppercase w-full max-w-md"
                         >
-                            {currentQIndex < QUESTIONS.length - 1 ? 'Next Question →' : 'Finish Game 🏠'}
+                            Return to Rules & Tracker →
                         </button>
                     </div>
                 </div>
