@@ -31,8 +31,10 @@ function App() {
             </Route>
 
             <Route path="elimino">
-              <Route index element={<Elimino />} />
-              <Route path=":id" element={<Elimino />} />
+              <Route index element={<Navigate to="rules" replace />} />
+              <Route path="rules" element={<Elimino />} />
+              <Route path="question/:id" element={<Elimino />} />
+              <Route path="answer/:id" element={<Elimino />} />
             </Route>
 
             <Route path="the-final-face-off" element={<FinalFaceOff />} />

@@ -41,3 +41,12 @@ export const MIND_SNAP_QUESTIONS = [
         answer_image: "https://images.unsplash.com/photo-1543332145-6e8de5e00344?q=80&w=1000&auto=format&fit=crop"
     }
 ];
+export const ELIMINO_QUESTIONS = [
+    {
+        id: 1,
+        question: "Which of these animals is the only one that can't fly?",
+        options: ["Ostrich", "Hummingbird", "Eagle", "Bat"],
+        eliminated: [1, 2],
+        answer: "Ostrich"
+    }
+];

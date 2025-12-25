@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { QUESTIONS as defaultClueDownQuestions, MIND_SNAP_QUESTIONS as defaultMindSnapQuestions } from '../data/gameData';
+import { QUESTIONS as defaultClueDownQuestions, MIND_SNAP_QUESTIONS as defaultMindSnapQuestions, ELIMINO_QUESTIONS as defaultEliminoQuestions } from '../data/gameData';
 
 const GameContext = createContext();
 
@@ -11,7 +11,7 @@ export function GameProvider({ children }) {
         return saved ? JSON.parse(saved) : {
             ClueDown: defaultClueDownQuestions,
             MindSnap: defaultMindSnapQuestions,
-            Elimino: []
+            Elimino: defaultEliminoQuestions
         };
     });
 
