@@ -41,7 +41,6 @@ Brain Buzz is a vibrant, interactive game hub designed for home parties, team bu
 ## 🛠️ Admin Access
 
 Access the Admin Panel at `/admin`.
-- **Default PIN**: `1234`
 
 ## 📦 Tech Stack
 
