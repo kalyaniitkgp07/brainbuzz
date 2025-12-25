@@ -25,13 +25,10 @@ export default function MindSnap() {
             if (index !== -1) {
                 setCurrentQIndex(index);
                 setShowClue(false);
+                markAsVisited('MindSnap', QUESTIONS[index].id);
             }
         }
-
-        if (isQuestion && currentQuestion) {
-            markAsVisited('MindSnap', currentQuestion.id);
-        }
-    }, [id, QUESTIONS, isQuestion, currentQuestion]);
+    }, [id, QUESTIONS, isQuestion]);
 
     const showQuestion = (index) => {
         const questionId = QUESTIONS[index]?.id;

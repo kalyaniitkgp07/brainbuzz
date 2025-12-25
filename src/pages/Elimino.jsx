@@ -34,13 +34,10 @@ export default function Elimino() {
                 setCurrentQIndex(index);
                 setEliminatedIndices([]);
                 setIsProcessing(false);
+                markAsVisited('Elimino', QUESTIONS[index].id);
             }
         }
-
-        if (isQuestion && currentQuestion) {
-            markAsVisited('Elimino', currentQuestion.id);
-        }
-    }, [id, QUESTIONS, isQuestion, currentQuestion]);
+    }, [id, QUESTIONS, isQuestion]);
 
     const playSound = (type) => {
         const audio = new Audio(SOUNDS[type]);

@@ -27,13 +27,12 @@ export default function FlashTrack() {
     useEffect(() => {
         if (id) {
             const idx = QUESTIONS.findIndex(q => q.id === parseInt(id));
-            if (idx !== -1) setCurrentQIndex(idx);
+            if (idx !== -1) {
+                setCurrentQIndex(idx);
+                markAsVisited('FlashTrack', QUESTIONS[idx].id);
+            }
         }
-
-        if (isQuestion && currentQuestion) {
-            markAsVisited('FlashTrack', currentQuestion.id);
-        }
-    }, [id, QUESTIONS, isQuestion, currentQuestion]);
+    }, [id, QUESTIONS, isQuestion]);
 
     // Handle reveal logic
     useEffect(() => {

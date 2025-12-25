@@ -25,15 +25,12 @@ export default function ClueDown() {
             if (index !== -1) {
                 setCurrentQIndex(index);
                 if (hintLevel === 0) setHintLevel(1);
+                markAsVisited('ClueDown', QUESTIONS[index].id);
             }
         } else if (isRules) {
             setHintLevel(0);
         }
-
-        if (isQuestion && currentQuestion) {
-            markAsVisited('ClueDown', currentQuestion.id);
-        }
-    }, [id, QUESTIONS, isRules, isQuestion, currentQuestion]);
+    }, [id, QUESTIONS, isRules, isQuestion]);
 
     const showQuestion = (index) => {
         const questionId = QUESTIONS[index]?.id;
