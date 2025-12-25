@@ -167,7 +167,7 @@ export default function MindSnap() {
                             onClick={() => navigate('/mindsnap/rules')}
                             className="bg-green-500 text-white px-12 py-5 rounded-2xl font-black text-2xl hover:bg-green-400 active:scale-95 transition-all shadow-xl uppercase w-full max-w-md"
                         >
-                            Return to Rules & Tracker →
+                            Return →
                         </button>
                     </div>
                 </div>

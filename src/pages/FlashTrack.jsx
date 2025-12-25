@@ -229,7 +229,7 @@ export default function FlashTrack() {
                                 onClick={() => navigate('/flashtrack/rules')}
                                 className="flex-1 bg-green-500 text-white px-8 py-5 rounded-2xl font-black text-2xl hover:bg-green-400 active:scale-95 transition-all shadow-xl uppercase"
                             >
-                                Return to Rules & Tracker →
+                                Return →
                             </button>
                         </div>
                     </div>

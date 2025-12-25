@@ -218,7 +218,7 @@ export default function Elimino() {
                             onClick={() => navigate('/elimino/rules')}
                             className="bg-green-500 hover:bg-green-400 text-white px-16 py-5 rounded-2xl font-black text-3xl shadow-xl transition-all uppercase w-full max-w-md"
                         >
-                            Return to Rules & Tracker →
+                            Return →
                         </button>
                     </div>
                 </div>
