@@ -4,7 +4,7 @@ import Lobby from './pages/Lobby';
 import ClueDown from './pages/ClueDown';
 import MindSnap from './pages/MindSnap';
 import Elimino from './pages/Elimino';
-import FinalFaceOff from './pages/FinalFaceOff';
+import FlashTrack from './pages/FlashTrack';
 import Admin from './pages/Admin';
 import { GameProvider } from './context/GameContext';
 
@@ -37,7 +37,12 @@ function App() {
               <Route path="answer/:id" element={<Elimino />} />
             </Route>
 
-            <Route path="the-final-face-off" element={<FinalFaceOff />} />
+            <Route path="flashtrack">
+              <Route index element={<Navigate to="rules" replace />} />
+              <Route path="rules" element={<FlashTrack />} />
+              <Route path="question/:id" element={<FlashTrack />} />
+              <Route path="answer/:id" element={<FlashTrack />} />
+            </Route>
             <Route path="admin" element={<Admin />} />
           </Route>
         </Routes>

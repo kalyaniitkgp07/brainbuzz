@@ -10,6 +10,18 @@ export default function Admin() {
     const [clueDownForm, setClueDownForm] = useState({ title: '', hints: ['', '', ''], answer: '', image: '' });
     const [mindSnapForm, setMindSnapForm] = useState({ question: '', question_image: '', clue: '', answer: '', answer_image: '' });
     const [eliminoForm, setEliminoForm] = useState({ question: '', options: ['', '', '', ''], answer: '', eliminated: '' });
+    const [flashTrackForm, setFlashTrackForm] = useState({
+        type: 'MacroMatch',
+        title: '',
+        images: '',
+        videoUrl: '',
+        audioUrl: '',
+        answer: '',
+        answerImage: '',
+        audioSpeed: '1',
+        videoSpeed: '1',
+        videoMuted: false
+    });
 
     const handleAddClueDown = (e) => {
         e.preventDefault();
@@ -59,6 +71,37 @@ export default function Admin() {
         }
     };
 
+    const handleAddFlashTrack = (e) => {
+        e.preventDefault();
+
+        const hasMedia = flashTrackForm.images.trim() || flashTrackForm.videoUrl.trim() || flashTrackForm.audioUrl.trim();
+
+        if (!hasMedia) {
+            alert("Please provide at least one media source: Images, Video URL, or Audio URL.");
+            return;
+        }
+
+        if (flashTrackForm.title && flashTrackForm.answer) {
+            const data = {
+                ...flashTrackForm,
+                images: flashTrackForm.images ? flashTrackForm.images.split(',').map(s => s.trim()).filter(s => s) : [],
+                audioSpeed: parseFloat(flashTrackForm.audioSpeed) || 1,
+                videoSpeed: parseFloat(flashTrackForm.videoSpeed) || 1
+            };
+
+            if (editingId) {
+                updateQuestion('FlashTrack', editingId, data);
+                setEditingId(null);
+            } else {
+                addQuestion('FlashTrack', data);
+            }
+            setFlashTrackForm({
+                type: 'MacroMatch', title: '', images: '', videoUrl: '', audioUrl: '',
+                answer: '', answerImage: '', audioSpeed: '1', videoSpeed: '1', videoMuted: false
+            });
+        }
+    };
+
     const handleEdit = (q) => {
         setEditingId(q.id);
         if (activeGame === 'ClueDown') {
@@ -83,6 +126,19 @@ export default function Admin() {
                 answer: typeof q.answer === 'object' ? q.answer.text : q.answer,
                 eliminated: q.eliminated ? q.eliminated.join(', ') : ''
             });
+        } else if (activeGame === 'FlashTrack') {
+            setFlashTrackForm({
+                type: q.type || 'MacroMatch',
+                title: q.title || '',
+                images: Array.isArray(q.images) ? q.images.join(', ') : (q.images || ''),
+                videoUrl: q.videoUrl || '',
+                audioUrl: q.audioUrl || '',
+                answer: q.answer,
+                answerImage: q.answerImage || '',
+                audioSpeed: q.audioSpeed?.toString() || '1',
+                videoSpeed: q.videoSpeed?.toString() || '1',
+                videoMuted: q.videoMuted || false
+            });
         }
     };
 
@@ -91,6 +147,10 @@ export default function Admin() {
         setClueDownForm({ title: '', hints: ['', '', ''], answer: '', image: '' });
         setMindSnapForm({ question: '', question_image: '', clue: '', answer: '', answer_image: '' });
         setEliminoForm({ question: '', options: ['', '', '', ''], answer: '', eliminated: '' });
+        setFlashTrackForm({
+            type: 'MacroMatch', title: '', images: '', videoUrl: '', audioUrl: '',
+            answer: '', answerImage: '', audioSpeed: '1', videoSpeed: '1', videoMuted: false
+        });
     };
 
     const handleFileUpload = (e) => {
@@ -154,9 +214,9 @@ export default function Admin() {
                                     onChange={(e) => setActiveGame(e.target.value)}
                                     className="bg-slate-900 text-white p-2 rounded-xl border-2 border-slate-700 outline-none focus:border-yellow-400 h-[42px] w-full"
                                 >
-                                    <option value="ClueDown">ClueDown</option>
-                                    <option value="MindSnap">MindSnap</option>
-                                    <option value="Elimino">Elimino</option>
+                                    {ALL_GAMES.map(game => (
+                                        <option key={game} value={game}>{game}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -367,6 +427,137 @@ export default function Admin() {
                             <div className="flex gap-4">
                                 <button className={`flex-1 ${editingId ? 'bg-blue-600 hover:bg-blue-500' : 'bg-yellow-400 hover:bg-yellow-300'} text-slate-900 py-4 rounded-xl font-black text-xl transition-all uppercase`}>
                                     {editingId ? 'Update Elimino Question' : 'Add Elimino Question'}
+                                </button>
+                                {editingId && (
+                                    <button
+                                        type="button"
+                                        onClick={cancelEdit}
+                                        className="flex-1 bg-slate-700 text-white py-4 rounded-xl font-black text-xl hover:bg-slate-600 transition-all uppercase"
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
+                        </form>
+                    )}
+
+                    {activeGame === 'FlashTrack' && (
+                        <form onSubmit={handleAddFlashTrack} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Question Type</label>
+                                    <select
+                                        value={flashTrackForm.type}
+                                        onChange={(e) => setFlashTrackForm({ ...flashTrackForm, type: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                    >
+                                        <option value="MacroMatch">MacroMatch</option>
+                                        <option value="BeatGlyph">BeatGlyph</option>
+                                        <option value="DarkDial">DarkDial</option>
+                                        <option value="ClipClick">ClipClick</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Title</label>
+                                    <input
+                                        placeholder="e.g., Identify this Theme"
+                                        value={flashTrackForm.title}
+                                        onChange={(e) => setFlashTrackForm({ ...flashTrackForm, title: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Images (Comma separated URLs)</label>
+                                <textarea
+                                    placeholder="image1.jpg, image2.jpg..."
+                                    value={flashTrackForm.images}
+                                    onChange={(e) => setFlashTrackForm({ ...flashTrackForm, images: e.target.value })}
+                                    className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none min-h-[60px]"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Video URL (Optional)</label>
+                                    <input
+                                        placeholder="/assets/video/..."
+                                        value={flashTrackForm.videoUrl}
+                                        onChange={(e) => setFlashTrackForm({ ...flashTrackForm, videoUrl: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Audio URL (Optional)</label>
+                                    <input
+                                        placeholder="/assets/audio/..."
+                                        value={flashTrackForm.audioUrl}
+                                        onChange={(e) => setFlashTrackForm({ ...flashTrackForm, audioUrl: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Correct Answer</label>
+                                    <input
+                                        placeholder="The correct answer text"
+                                        value={flashTrackForm.answer}
+                                        onChange={(e) => setFlashTrackForm({ ...flashTrackForm, answer: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Answer Image (Optional)</label>
+                                    <input
+                                        placeholder="URL of image to show with answer"
+                                        value={flashTrackForm.answerImage}
+                                        onChange={(e) => setFlashTrackForm({ ...flashTrackForm, answerImage: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Audio Speed</label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        value={flashTrackForm.audioSpeed}
+                                        onChange={(e) => setFlashTrackForm({ ...flashTrackForm, audioSpeed: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Video Speed</label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        value={flashTrackForm.videoSpeed}
+                                        onChange={(e) => setFlashTrackForm({ ...flashTrackForm, videoSpeed: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-2 pt-8">
+                                    <input
+                                        type="checkbox"
+                                        id="video-muted"
+                                        checked={flashTrackForm.videoMuted}
+                                        onChange={(e) => setFlashTrackForm({ ...flashTrackForm, videoMuted: e.target.checked })}
+                                        className="w-5 h-5 accent-yellow-400"
+                                    />
+                                    <label htmlFor="video-muted" className="text-slate-400 text-xs font-black uppercase">Video Muted</label>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4">
+                                <button className={`flex-1 ${editingId ? 'bg-blue-600 hover:bg-blue-500' : 'bg-yellow-400 hover:bg-yellow-300'} text-slate-900 py-4 rounded-xl font-black text-xl transition-all uppercase`}>
+                                    {editingId ? 'Update FlashTrack Question' : 'Add FlashTrack Question'}
                                 </button>
                                 {editingId && (
                                     <button

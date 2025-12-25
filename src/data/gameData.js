@@ -1,4 +1,4 @@
-export const GAMES = ["ClueDown", "MindSnap", "Elimino", "The Final Face-Off"];
+export const GAMES = ["ClueDown", "MindSnap", "Elimino", "FlashTrack"];
 
 export const QUESTIONS = [
     {
@@ -48,5 +48,51 @@ export const ELIMINO_QUESTIONS = [
         options: ["Ostrich", "Hummingbird", "Eagle", "Bat"],
         eliminated: [1, 2],
         answer: "Ostrich"
+    }
+];
+
+export const FLASH_TRACK_QUESTIONS = [
+    {
+        id: 1,
+        type: "MacroMatch",
+        title: "Identify this Animated Classic",
+        images: [
+            "https://images.unsplash.com/photo-1543332145-6e8de5e00344?q=80&w=1000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1543332145-6e8de5e00344?q=80&w=1000&auto=format&fit=crop"
+        ],
+        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+        answer: "The Jungle Book",
+        answerImage: "https://upload.wikimedia.org/wikipedia/en/1/1d/The_Jungle_Book_1967_poster.jpg",
+        audioSpeed: 1,
+        videoSpeed: 1,
+        videoMuted: false
+    },
+    {
+        id: 2,
+        type: "BeatGlyph",
+        title: "Name the Artist",
+        images: [],
+        audioUrl: "https://www.w3schools.com/html/horse.mp3",
+        answer: "The Beatles",
+        answerImage: "https://upload.wikimedia.org/wikipedia/en/a/a4/Beatles_-_Abbey_Road.jpg",
+        audioSpeed: 1.2,
+        videoSpeed: 1,
+        videoMuted: false
+    },
+    {
+        id: 3,
+        type: "ClipClick",
+        title: "Which Country?",
+        images: [
+            "https://images.unsplash.com/photo-1524413845963-1a251b6540b3?q=80&w=1000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=1000&auto=format&fit=crop"
+        ],
+        videoUrl: "",
+        audioUrl: "",
+        answer: "Japan",
+        answerImage: "https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=1000&auto=format&fit=crop",
+        audioSpeed: 1,
+        videoSpeed: 1,
+        videoMuted: false
     }
 ];

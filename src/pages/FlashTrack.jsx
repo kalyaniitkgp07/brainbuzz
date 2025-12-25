@@ -1,0 +1,233 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useGame } from '../context/GameContext';
+
+export default function FlashTrack() {
+    const { questions } = useGame();
+    const { id } = useParams();
+    const { pathname } = useLocation();
+    const navigate = useNavigate();
+    const QUESTIONS = questions.FlashTrack || [];
+
+    const [currentQIndex, setCurrentQIndex] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [visibleImages, setVisibleImages] = useState([]);
+    const [mediaDuration, setMediaDuration] = useState(0);
+
+    const videoRef = useRef(null);
+    const audioRef = useRef(null);
+
+    const isRules = pathname.includes('/rules');
+    const isQuestion = pathname.includes('/question/');
+    const isAnswer = pathname.includes('/answer/');
+
+    const currentQuestion = QUESTIONS.find(q => q.id === parseInt(id)) || QUESTIONS[currentQIndex];
+
+    useEffect(() => {
+        if (id) {
+            const idx = QUESTIONS.findIndex(q => q.id === parseInt(id));
+            if (idx !== -1) setCurrentQIndex(idx);
+        }
+    }, [id, QUESTIONS]);
+
+    // Handle reveal logic
+    useEffect(() => {
+        let timers = [];
+        if (isPlaying && currentQuestion.images?.length > 0) {
+            const count = currentQuestion.images.length;
+            // If duration is known, space them out. If not, reveal first one immediately.
+            const interval = mediaDuration > 0 ? (mediaDuration * 1000) / count : 1000;
+
+            currentQuestion.images.forEach((img, idx) => {
+                const timer = setTimeout(() => {
+                    setVisibleImages(prev => [...new Set([...prev, img])]);
+                }, idx * interval);
+                timers.push(timer);
+            });
+        }
+        return () => timers.forEach(clearTimeout);
+    }, [isPlaying, currentQuestion, mediaDuration]);
+
+    const handleStart = () => {
+        setIsPlaying(true);
+        setVisibleImages([]);
+
+        if (videoRef.current) {
+            videoRef.current.playbackRate = currentQuestion.videoSpeed || 1;
+            videoRef.current.muted = currentQuestion.videoMuted || false;
+            videoRef.current.play();
+        }
+        if (audioRef.current) {
+            audioRef.current.playbackRate = currentQuestion.audioSpeed || 1;
+            audioRef.current.play();
+        }
+    };
+
+    const getAnswerTextSize = (text, hasImage) => {
+        const len = text.length;
+        if (hasImage) {
+            if (len > 30) return 'text-2xl md:text-3xl';
+            if (len > 15) return 'text-3xl md:text-4xl';
+            return 'text-4xl md:text-5xl';
+        } else {
+            if (len > 40) return 'text-3xl md:text-4xl';
+            if (len > 25) return 'text-4xl md:text-5xl';
+            if (len > 15) return 'text-5xl md:text-6xl';
+            return 'text-6xl md:text-7xl';
+        }
+    };
+
+    const onMediaLoaded = (e) => {
+        const duration = e.target.duration;
+        if (duration > mediaDuration) setMediaDuration(duration);
+    };
+
+    if (!currentQuestion) return <div>No Questions Found</div>;
+
+    if (isRules) {
+        return (
+            <div className="max-w-4xl mx-auto p-8 bg-slate-900/50 backdrop-blur-xl rounded-[40px] border-2 border-slate-800 shadow-2xl mt-10">
+                <h1 className="text-6xl font-black text-yellow-400 mb-8 uppercase italic tracking-tighter text-center">FlashTrack</h1>
+                <div className="space-y-6 text-xl text-slate-300">
+                    <p className="flex items-center gap-4 bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
+                        <span className="bg-yellow-400 text-slate-900 w-10 h-10 rounded-full flex items-center justify-center font-black">1</span>
+                        Identify the subject from a fast-paced media mix!
+                    </p>
+                    <p className="flex items-center gap-4 bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
+                        <span className="bg-yellow-400 text-slate-900 w-10 h-10 rounded-full flex items-center justify-center font-black">2</span>
+                        Watch the video or listen to the audio carefully.
+                    </p>
+                    <p className="flex items-center gap-4 bg-slate-800/50 p-6 rounded-3xl border border-slate-700">
+                        <span className="bg-yellow-400 text-slate-900 w-10 h-10 rounded-full flex items-center justify-center font-black">3</span>
+                        Images will reveal sequentially as the media plays.
+                    </p>
+                </div>
+                <button
+                    onClick={() => navigate(`/flashtrack/question/${currentQuestion.id}`)}
+                    className="w-full mt-10 bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-black py-6 rounded-3xl text-3xl transition-all hover:scale-105 shadow-[0_0_30px_rgba(251,191,36,0.3)] uppercase"
+                >
+                    Start Round
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-7xl mx-auto space-y-8 p-4">
+            {/* Type Header */}
+            <div className="text-center">
+                <span className="bg-yellow-400/10 text-yellow-400 px-6 py-2 rounded-full text-sm font-black uppercase tracking-widest border border-yellow-400/20">
+                    {currentQuestion.type}
+                </span>
+                <h2 className="text-4xl font-black text-white mt-4 uppercase tracking-tight">{currentQuestion.title}</h2>
+            </div>
+
+            <div className={`grid gap-8 ${isAnswer ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 max-w-5xl mx-auto'}`}>
+                {/* Left Column: Media Container */}
+                <div className="space-y-6">
+                    <div className="relative aspect-video bg-slate-900 rounded-[40px] overflow-hidden border-2 border-slate-800 shadow-2xl group">
+                        {!isPlaying ? (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm z-20">
+                                <button
+                                    onClick={handleStart}
+                                    className="bg-yellow-400 hover:bg-yellow-300 text-slate-900 p-10 rounded-full font-black text-4xl shadow-2xl transition-all hover:scale-110 flex items-center justify-center group"
+                                >
+                                    <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                </button>
+                                <p className="mt-6 text-slate-400 font-black uppercase tracking-widest">Click to Start Media</p>
+                            </div>
+                        ) : (
+                            <>
+                                {visibleImages.length > 0 && (
+                                    <div className="absolute inset-0 z-10 p-4 grid grid-cols-2 md:grid-cols-3 gap-4 pointer-events-none">
+                                        {visibleImages.map((img, i) => (
+                                            <img
+                                                key={i}
+                                                src={img}
+                                                alt=""
+                                                className="w-full h-full object-cover rounded-2xl animate-in fade-in zoom-in duration-500 border-2 border-white/20"
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                                {visibleImages.length === 0 && !currentQuestion.videoUrl && currentQuestion.audioUrl && (
+                                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                                        <div className="flex gap-1 items-end h-20">
+                                            {[...Array(5)].map((_, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="w-3 bg-yellow-400 rounded-full animate-bounce"
+                                                    style={{ animationDelay: `${i * 0.1}s`, height: `${Math.random() * 100}%` }}
+                                                />
+                                            ))}
+                                        </div>
+                                        <p className="absolute bottom-10 text-slate-400 font-black uppercase tracking-widest animate-pulse">Playing Audio...</p>
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {currentQuestion.videoUrl && (
+                            <video
+                                ref={videoRef}
+                                src={currentQuestion.videoUrl}
+                                className="w-full h-full object-cover"
+                                onLoadedMetadata={onMediaLoaded}
+                            />
+                        )}
+                        {currentQuestion.audioUrl && (
+                            <audio
+                                ref={audioRef}
+                                src={currentQuestion.audioUrl}
+                                onLoadedMetadata={onMediaLoaded}
+                            />
+                        )}
+                    </div>
+
+                    {isQuestion && (
+                        <div className="flex justify-center uppercase">
+                            <button
+                                onClick={() => navigate(`/flashtrack/answer/${currentQuestion.id}`)}
+                                className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase transition-all tracking-widest border border-slate-700"
+                            >
+                                Reveal Answer
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Right Column: Answer Section */}
+                {isAnswer && (
+                    <div className="bg-white/10 backdrop-blur-md p-8 rounded-[40px] border border-white/20 text-center space-y-6 animate-in slide-in-from-right duration-700 h-full flex flex-col justify-center">
+                        <div className="space-y-4">
+                            <h3 className="text-slate-400 font-black uppercase tracking-widest text-sm">Correct Answer</h3>
+                            <p className={`${getAnswerTextSize(currentQuestion.answer, !!currentQuestion.answerImage)} font-black text-white uppercase leading-tight`}>
+                                {currentQuestion.answer}
+                            </p>
+                        </div>
+
+                        {currentQuestion.answerImage && (
+                            <div className="relative group">
+                                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-[32px] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                                <img src={currentQuestion.answerImage} alt="Answer" className="relative max-h-72 mx-auto rounded-[30px] border-4 border-yellow-400 shadow-2xl object-cover" />
+                            </div>
+                        )}
+
+                        <div className="pt-4">
+                            <button
+                                onClick={() => {
+                                    const nextQ = QUESTIONS[currentQIndex + 1];
+                                    if (nextQ) navigate(`/flashtrack/question/${nextQ.id}`);
+                                    else navigate('/');
+                                }}
+                                className="w-full bg-yellow-400 text-slate-900 px-10 py-5 rounded-3xl font-black text-2xl hover:bg-yellow-300 transition-all hover:scale-105 shadow-[0_0_30px_rgba(251,191,36,0.2)] uppercase"
+                            >
+                                {QUESTIONS[currentQIndex + 1] ? 'Next Round' : 'Finish Game'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

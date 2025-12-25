@@ -1,18 +1,29 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { QUESTIONS as defaultClueDownQuestions, MIND_SNAP_QUESTIONS as defaultMindSnapQuestions, ELIMINO_QUESTIONS as defaultEliminoQuestions } from '../data/gameData';
+import { QUESTIONS as defaultClueDownQuestions, MIND_SNAP_QUESTIONS as defaultMindSnapQuestions, ELIMINO_QUESTIONS as defaultEliminoQuestions, FLASH_TRACK_QUESTIONS as defaultFlashTrackQuestions } from '../data/gameData';
 
 const GameContext = createContext();
 
-export const ALL_GAMES = ["ClueDown", "MindSnap", "Elimino", "The Final Face-Off"];
+export const ALL_GAMES = ["ClueDown", "MindSnap", "Elimino", "FlashTrack"];
 
 export function GameProvider({ children }) {
     const [questions, setQuestions] = useState(() => {
         const saved = localStorage.getItem('bb_questions_v2');
-        return saved ? JSON.parse(saved) : {
+        const defaults = {
             ClueDown: defaultClueDownQuestions,
             MindSnap: defaultMindSnapQuestions,
-            Elimino: defaultEliminoQuestions
+            Elimino: defaultEliminoQuestions,
+            FlashTrack: defaultFlashTrackQuestions
         };
+
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // Merge defaults for any missing keys (e.g. FlashTrack which was added later)
+            return {
+                ...defaults,
+                ...parsed
+            };
+        }
+        return defaults;
     });
 
     const [enabledGames, setEnabledGames] = useState(() => {
