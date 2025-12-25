@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useGame, ALL_GAMES } from '../context/GameContext';
 
 export default function Admin() {
-    const { questions, addQuestion, bulkAddQuestions, removeQuestion, clearQuestions, enabledGames, toggleGame } = useGame();
+    const { questions, addQuestion, updateQuestion, bulkAddQuestions, removeQuestion, clearQuestions, enabledGames, toggleGame } = useGame();
     const [activeGame, setActiveGame] = useState('ClueDown');
+    const [editingId, setEditingId] = useState(null);
 
     // Form States
     const [clueDownForm, setClueDownForm] = useState({ title: '', hints: ['', '', ''], answer: '', image: '' });
@@ -12,7 +13,12 @@ export default function Admin() {
     const handleAddClueDown = (e) => {
         e.preventDefault();
         if (clueDownForm.answer && clueDownForm.hints.every(h => h)) {
-            addQuestion('ClueDown', clueDownForm);
+            if (editingId) {
+                updateQuestion('ClueDown', editingId, clueDownForm);
+                setEditingId(null);
+            } else {
+                addQuestion('ClueDown', clueDownForm);
+            }
             setClueDownForm({ title: '', hints: ['', '', ''], answer: '', image: '' });
         }
     };
@@ -20,12 +26,44 @@ export default function Admin() {
     const handleAddCategoryChaos = (e) => {
         e.preventDefault();
         if (categoryChaosForm.category && categoryChaosForm.items) {
-            addQuestion('CategoryChaos', {
+            const data = {
                 category: categoryChaosForm.category,
-                items: categoryChaosForm.items.split(',').map(i => i.trim())
-            });
+                items: typeof categoryChaosForm.items === 'string'
+                    ? categoryChaosForm.items.split(',').map(i => i.trim())
+                    : categoryChaosForm.items
+            };
+
+            if (editingId) {
+                updateQuestion('CategoryChaos', editingId, data);
+                setEditingId(null);
+            } else {
+                addQuestion('CategoryChaos', data);
+            }
             setCategoryChaosForm({ category: '', items: '' });
         }
+    };
+
+    const handleEdit = (q) => {
+        setEditingId(q.id);
+        if (activeGame === 'ClueDown') {
+            setClueDownForm({
+                title: q.title || '',
+                hints: q.hints,
+                answer: q.answer,
+                image: q.image || ''
+            });
+        } else {
+            setCategoryChaosForm({
+                category: q.category,
+                items: Array.isArray(q.items) ? q.items.join(', ') : q.items
+            });
+        }
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+        setClueDownForm({ title: '', hints: ['', '', ''], answer: '', image: '' });
+        setCategoryChaosForm({ category: '', items: '' });
     };
 
     const handleFileUpload = (e) => {
@@ -76,86 +114,135 @@ export default function Admin() {
                             <h2 className="text-3xl font-black text-yellow-400 uppercase">Question Editor</h2>
                             <p className="text-slate-500 text-sm italic">Add individually or bulk upload</p>
                         </div>
-                        <div className="flex gap-3 w-full sm:w-auto">
-                            <label className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold cursor-pointer transition-all text-center flex items-center justify-center gap-2">
+                        <div className="flex gap-3 w-full sm:w-auto items-end">
+                            <label className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-bold cursor-pointer transition-all text-center flex items-center justify-center gap-2 h-[42px]">
                                 📤 Bulk Upload
                                 <input type="file" accept=".json" onChange={handleFileUpload} className="hidden" />
                             </label>
-                            <select
-                                value={activeGame}
-                                onChange={(e) => setActiveGame(e.target.value)}
-                                className="flex-1 sm:flex-none bg-slate-900 text-white p-2 rounded-xl border-2 border-slate-700 outline-none focus:border-yellow-400"
-                            >
-                                <option value="ClueDown">ClueDown</option>
-                                <option value="CategoryChaos">CategoryChaos</option>
-                            </select>
+                            <div className="flex-1 sm:flex-none">
+                                <label htmlFor="game-select" className="block text-slate-400 text-[10px] font-black uppercase mb-1 ml-1 text-right">Game</label>
+                                <select
+                                    id="game-select"
+                                    value={activeGame}
+                                    onChange={(e) => setActiveGame(e.target.value)}
+                                    className="bg-slate-900 text-white p-2 rounded-xl border-2 border-slate-700 outline-none focus:border-yellow-400 h-[42px] w-full"
+                                >
+                                    <option value="ClueDown">ClueDown</option>
+                                    <option value="CategoryChaos">CategoryChaos</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
                     {activeGame === 'ClueDown' && (
                         <form onSubmit={handleAddClueDown} className="space-y-6">
-                            <input
-                                placeholder="Question Title (Optional - e.g. Category, Era)"
-                                value={clueDownForm.title}
-                                onChange={(e) => setClueDownForm({ ...clueDownForm, title: e.target.value })}
-                                className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
-                            />
+                            <div>
+                                <label htmlFor="clue-title" className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Question Title</label>
+                                <input
+                                    id="clue-title"
+                                    placeholder="Optional - e.g. Category, Era"
+                                    value={clueDownForm.title}
+                                    onChange={(e) => setClueDownForm({ ...clueDownForm, title: e.target.value })}
+                                    className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                />
+                            </div>
                             <div className="grid grid-cols-1 gap-4">
                                 {clueDownForm.hints.map((hint, i) => (
-                                    <input
-                                        key={i}
-                                        placeholder={`Hint ${i + 1}`}
-                                        value={hint}
-                                        onChange={(e) => {
-                                            const newHints = [...clueDownForm.hints];
-                                            newHints[i] = e.target.value;
-                                            setClueDownForm({ ...clueDownForm, hints: newHints });
-                                        }}
-                                        className="bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
-                                        required
-                                    />
+                                    <div key={i}>
+                                        <label htmlFor={`hint-${i}`} className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Hint {i + 1}</label>
+                                        <input
+                                            id={`hint-${i}`}
+                                            placeholder={`Description for hint ${i + 1}`}
+                                            value={hint}
+                                            onChange={(e) => {
+                                                const newHints = [...clueDownForm.hints];
+                                                newHints[i] = e.target.value;
+                                                setClueDownForm({ ...clueDownForm, hints: newHints });
+                                            }}
+                                            className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                            required
+                                        />
+                                    </div>
                                 ))}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <input
-                                    placeholder="Answer"
-                                    value={clueDownForm.answer}
-                                    onChange={(e) => setClueDownForm({ ...clueDownForm, answer: e.target.value })}
-                                    className="bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
-                                    required
-                                />
-                                <input
-                                    placeholder="Image URL"
-                                    value={clueDownForm.image}
-                                    onChange={(e) => setClueDownForm({ ...clueDownForm, image: e.target.value })}
-                                    className="bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
-                                />
+                                <div>
+                                    <label htmlFor="clue-answer" className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Answer</label>
+                                    <input
+                                        id="clue-answer"
+                                        placeholder="The correct answer"
+                                        value={clueDownForm.answer}
+                                        onChange={(e) => setClueDownForm({ ...clueDownForm, answer: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="clue-image" className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Image URL</label>
+                                    <input
+                                        id="clue-image"
+                                        placeholder="https://example.com/image.jpg"
+                                        value={clueDownForm.image}
+                                        onChange={(e) => setClueDownForm({ ...clueDownForm, image: e.target.value })}
+                                        className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                    />
+                                </div>
                             </div>
-                            <button className="w-full bg-yellow-400 text-slate-900 py-4 rounded-xl font-black text-xl hover:bg-yellow-300 transition-all uppercase">
-                                Add ClueDown Question
-                            </button>
+                            <div className="flex gap-4">
+                                <button className={`flex-1 ${editingId ? 'bg-blue-600 hover:bg-blue-500' : 'bg-yellow-400 hover:bg-yellow-300'} text-slate-900 py-4 rounded-xl font-black text-xl transition-all uppercase`}>
+                                    {editingId ? 'Update ClueDown Question' : 'Add ClueDown Question'}
+                                </button>
+                                {editingId && (
+                                    <button
+                                        type="button"
+                                        onClick={cancelEdit}
+                                        className="flex-1 bg-slate-700 text-white py-4 rounded-xl font-black text-xl hover:bg-slate-600 transition-all uppercase"
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
                         </form>
                     )}
 
                     {activeGame === 'CategoryChaos' && (
                         <form onSubmit={handleAddCategoryChaos} className="space-y-6">
-                            <input
-                                placeholder="Category Name (e.g., Programming Languages)"
-                                value={categoryChaosForm.category}
-                                onChange={(e) => setCategoryChaosForm({ ...categoryChaosForm, category: e.target.value })}
-                                className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
-                                required
-                            />
-                            <textarea
-                                placeholder="Items (comma separated: Javascript, Python, Go...)"
-                                value={categoryChaosForm.items}
-                                onChange={(e) => setCategoryChaosForm({ ...categoryChaosForm, items: e.target.value })}
-                                className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none min-h-[100px]"
-                                required
-                            />
-                            <button className="w-full bg-yellow-400 text-slate-900 py-4 rounded-xl font-black text-xl hover:bg-yellow-300 transition-all uppercase">
-                                Add CategoryChaos Question
-                            </button>
+                            <div>
+                                <label htmlFor="cat-name" className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Category Name</label>
+                                <input
+                                    id="cat-name"
+                                    placeholder="e.g., Programming Languages"
+                                    value={categoryChaosForm.category}
+                                    onChange={(e) => setCategoryChaosForm({ ...categoryChaosForm, category: e.target.value })}
+                                    className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="cat-items" className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Items</label>
+                                <textarea
+                                    id="cat-items"
+                                    placeholder="Comma separated: Javascript, Python, Go..."
+                                    value={categoryChaosForm.items}
+                                    onChange={(e) => setCategoryChaosForm({ ...categoryChaosForm, items: e.target.value })}
+                                    className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none min-h-[100px]"
+                                    required
+                                />
+                            </div>
+                            <div className="flex gap-4">
+                                <button className={`flex-1 ${editingId ? 'bg-blue-600 hover:bg-blue-500' : 'bg-yellow-400 hover:bg-yellow-300'} text-slate-900 py-4 rounded-xl font-black text-xl transition-all uppercase`}>
+                                    {editingId ? 'Update CategoryChaos Question' : 'Add CategoryChaos Question'}
+                                </button>
+                                {editingId && (
+                                    <button
+                                        type="button"
+                                        onClick={cancelEdit}
+                                        className="flex-1 bg-slate-700 text-white py-4 rounded-xl font-black text-xl hover:bg-slate-600 transition-all uppercase"
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
                         </form>
                     )}
                 </div>
@@ -180,17 +267,24 @@ export default function Admin() {
                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                         {(questions[activeGame] || []).length === 0 && <p className="text-slate-500 italic">No questions added yet.</p>}
                         {(questions[activeGame] || []).map((q) => (
-                            <div key={q.id} className="bg-slate-900 p-5 rounded-2xl flex justify-between items-center border border-slate-700">
+                            <div key={q.id} className="bg-slate-900 p-5 rounded-2xl flex justify-between items-center border border-slate-700 transition-all">
                                 <div>
-                                    <h4 className="font-black text-white">{activeGame === 'ClueDown' ? q.answer : q.category}</h4>
-                                    <p className="text-sm text-slate-500">Question ID: {q.id}</p>
+                                    <h4 className="font-black text-white">{q.title || q.answer || q.category}</h4>
                                 </div>
-                                <button
-                                    onClick={() => removeQuestion(activeGame, q.id)}
-                                    className="bg-red-900/50 text-red-500 p-2 rounded-lg hover:bg-red-800 transition-colors"
-                                >
-                                    Delete
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleEdit(q)}
+                                        className="bg-blue-900/50 text-blue-400 p-2 rounded-lg hover:bg-blue-800 transition-colors font-bold text-sm px-4"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => removeQuestion(activeGame, q.id)}
+                                        className="bg-red-900/50 text-red-500 p-2 rounded-lg hover:bg-red-800 transition-colors font-bold text-sm px-4"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>

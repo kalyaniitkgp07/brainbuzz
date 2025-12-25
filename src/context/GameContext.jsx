@@ -34,6 +34,13 @@ export function GameProvider({ children }) {
         }));
     };
 
+    const updateQuestion = (game, id, updatedData) => {
+        setQuestions(prev => ({
+            ...prev,
+            [game]: prev[game].map(q => q.id === id ? { ...q, ...updatedData } : q)
+        }));
+    };
+
     const bulkAddQuestions = (game, questionList) => {
         setQuestions(prev => ({
             ...prev,
@@ -70,6 +77,7 @@ export function GameProvider({ children }) {
             enabledGames,
             setEnabledGames,
             addQuestion,
+            updateQuestion,
             bulkAddQuestions,
             removeQuestion,
             clearQuestions,

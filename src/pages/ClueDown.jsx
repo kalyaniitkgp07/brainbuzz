@@ -1,35 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 
 export default function ClueDown() {
     const { questions } = useGame();
     const { id } = useParams();
+    const { pathname } = useLocation();
     const QUESTIONS = questions.ClueDown || [];
-    const [view, setView] = useState('rules');
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [hintLevel, setHintLevel] = useState(0);
     const navigate = useNavigate();
 
     const currentQuestion = QUESTIONS[currentQIndex];
 
+    // Determine view from URL
+    const isRules = pathname.includes('/rules');
+    const isAnswer = pathname.includes('/answer/');
+    const isQuestion = pathname.includes('/question/');
+
     useEffect(() => {
         if (id && QUESTIONS.length > 0) {
             const index = QUESTIONS.findIndex(q => q.id === parseInt(id));
             if (index !== -1) {
                 setCurrentQIndex(index);
-                setView('question');
                 if (hintLevel === 0) setHintLevel(1);
             }
-        } else if (!id) {
-            setView('rules');
+        } else if (isRules) {
             setHintLevel(0);
         }
-    }, [id, QUESTIONS]);
+    }, [id, QUESTIONS, isRules]);
 
     const showQuestion = (index) => {
         const questionId = QUESTIONS[index]?.id;
-        if (questionId) navigate(`/cluedown/${questionId}`);
+        if (questionId) navigate(`/cluedown/question/${questionId}`);
     };
 
     const nextHint = () => {
@@ -54,7 +57,7 @@ export default function ClueDown() {
     return (
         <div className="w-full flex flex-col items-center animate-fade-in">
             {/* RULES VIEW */}
-            {view === 'rules' && (
+            {isRules && (
                 <div className="max-w-4xl w-full bg-slate-800 p-12 rounded-3xl shadow-2xl border-b-8 border-yellow-500">
                     <h2 className="text-5xl font-black mb-8 text-yellow-400 uppercase tracking-tight">Rules: ClueDown</h2>
                     <ul className="text-2xl space-y-6 mb-12">
@@ -75,7 +78,7 @@ export default function ClueDown() {
             )}
 
             {/* QUESTION VIEW */}
-            {view === 'question' && (
+            {isQuestion && currentQuestion && (
                 <div className="w-full max-w-5xl h-[700px] bg-slate-800 rounded-3xl p-10 flex flex-col shadow-2xl relative border-b-8 border-blue-500 overflow-hidden">
                     <div className="relative z-10 flex flex-col h-full">
                         <div className="flex-none">
@@ -107,7 +110,7 @@ export default function ClueDown() {
                                 Next Hint
                             </button>
                             <button
-                                onClick={() => setView('answer')}
+                                onClick={() => navigate(`/cluedown/answer/${currentQuestion.id}`)}
                                 className="bg-green-500 hover:bg-green-400 text-white px-12 py-4 rounded-xl font-black text-2xl shadow-xl active:scale-95 uppercase"
                             >
                                 REVEAL ANSWER
@@ -120,7 +123,7 @@ export default function ClueDown() {
             )}
 
             {/* ANSWER VIEW */}
-            {view === 'answer' && (
+            {isAnswer && currentQuestion && (
                 <div className="w-full max-w-6xl flex flex-col md:flex-row gap-8 animate-slide-up">
                     {/* Left Side: Hints */}
                     <div className="md:w-1/2 bg-slate-800 p-10 rounded-3xl border-l-8 border-green-500 shadow-2xl">

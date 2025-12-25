@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Lobby from './pages/Lobby';
 import ClueDown from './pages/ClueDown';
@@ -15,9 +15,21 @@ function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Lobby />} />
-            <Route path="cluedown/:id?" element={<ClueDown />} />
+
+            <Route path="cluedown">
+              <Route index element={<Navigate to="rules" replace />} />
+              <Route path="rules" element={<ClueDown />} />
+              <Route path="question/:id" element={<ClueDown />} />
+              <Route path="answer/:id" element={<ClueDown />} />
+            </Route>
+
             <Route path="fast-fingers" element={<FastFingers />} />
-            <Route path="category-chaos/:id?" element={<CategoryChaos />} />
+
+            <Route path="category-chaos">
+              <Route index element={<CategoryChaos />} />
+              <Route path=":id" element={<CategoryChaos />} />
+            </Route>
+
             <Route path="the-final-face-off" element={<FinalFaceOff />} />
             <Route path="admin" element={<Admin />} />
           </Route>
