@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 
-export default function CategoryChaos() {
+export default function Elimino() {
     const { questions } = useGame();
     const { id } = useParams();
-    const QUESTIONS = questions.CategoryChaos || [];
+    const QUESTIONS = questions.Elimino || [];
     const [view, setView] = useState('rules'); // rules, game
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [revealedCount, setRevealedCount] = useState(0);
@@ -29,7 +29,7 @@ export default function CategoryChaos() {
     const handleNextQuestion = () => {
         if (currentQIndex < QUESTIONS.length - 1) {
             const nextId = QUESTIONS[currentQIndex + 1]?.id;
-            if (nextId) navigate(`/category-chaos/${nextId}`);
+            if (nextId) navigate(`/elimino/${nextId}`);
         } else {
             navigate('/');
         }
@@ -54,7 +54,7 @@ export default function CategoryChaos() {
         <div className="w-full max-w-5xl animate-fade-in py-12">
             {view === 'rules' ? (
                 <div className="bg-slate-800 p-12 rounded-3xl shadow-2xl border-b-8 border-purple-500">
-                    <h2 className="text-5xl font-black mb-8 text-purple-400 uppercase">Rules: Category Chaos</h2>
+                    <h2 className="text-5xl font-black mb-8 text-purple-400 uppercase">Rules: Elimino</h2>
                     <p className="text-2xl mb-12 text-slate-300">
                         A category will be shown. Your goal is to name as many items belonging to that category as possible!
                     </p>
@@ -62,7 +62,7 @@ export default function CategoryChaos() {
                         <button
                             onClick={() => {
                                 const firstId = QUESTIONS[0]?.id;
-                                if (firstId) navigate(`/category-chaos/${firstId}`);
+                                if (firstId) navigate(`/elimino/${firstId}`);
                             }}
                             className="bg-purple-500 text-white px-12 py-4 rounded-full text-3xl font-black hover:bg-purple-400 transition-all shadow-xl uppercase"
                         >

@@ -3,7 +3,7 @@ import Layout from './components/Layout';
 import Lobby from './pages/Lobby';
 import ClueDown from './pages/ClueDown';
 import MindSnap from './pages/MindSnap';
-import CategoryChaos from './pages/CategoryChaos';
+import Elimino from './pages/Elimino';
 import FinalFaceOff from './pages/FinalFaceOff';
 import Admin from './pages/Admin';
 import { GameProvider } from './context/GameContext';
@@ -30,9 +30,9 @@ function App() {
               <Route path="answer/:id" element={<MindSnap />} />
             </Route>
 
-            <Route path="category-chaos">
-              <Route index element={<CategoryChaos />} />
-              <Route path=":id" element={<CategoryChaos />} />
+            <Route path="elimino">
+              <Route index element={<Elimino />} />
+              <Route path=":id" element={<Elimino />} />
             </Route>
 
             <Route path="the-final-face-off" element={<FinalFaceOff />} />

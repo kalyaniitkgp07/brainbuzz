@@ -1,4 +1,4 @@
-export const GAMES = ["ClueDown", "Fast Fingers", "Category Chaos", "The Final Face-Off"];
+export const GAMES = ["ClueDown", "MindSnap", "Elimino", "The Final Face-Off"];
 
 export const QUESTIONS = [
     {

@@ -9,7 +9,7 @@ export default function Admin() {
     // Form States
     const [clueDownForm, setClueDownForm] = useState({ title: '', hints: ['', '', ''], answer: '', image: '' });
     const [mindSnapForm, setMindSnapForm] = useState({ question: '', question_image: '', clue: '', answer: '', answer_image: '' });
-    const [categoryChaosForm, setCategoryChaosForm] = useState({ category: '', items: '' });
+    const [eliminoForm, setEliminoForm] = useState({ category: '', items: '' });
 
     const handleAddClueDown = (e) => {
         e.preventDefault();
@@ -37,23 +37,23 @@ export default function Admin() {
         }
     };
 
-    const handleAddCategoryChaos = (e) => {
+    const handleAddElimino = (e) => {
         e.preventDefault();
-        if (categoryChaosForm.category && categoryChaosForm.items) {
+        if (eliminoForm.category && eliminoForm.items) {
             const data = {
-                category: categoryChaosForm.category,
-                items: typeof categoryChaosForm.items === 'string'
-                    ? categoryChaosForm.items.split(',').map(i => i.trim())
-                    : categoryChaosForm.items
+                category: eliminoForm.category,
+                items: typeof eliminoForm.items === 'string'
+                    ? eliminoForm.items.split(',').map(i => i.trim())
+                    : eliminoForm.items
             };
 
             if (editingId) {
-                updateQuestion('CategoryChaos', editingId, data);
+                updateQuestion('Elimino', editingId, data);
                 setEditingId(null);
             } else {
-                addQuestion('CategoryChaos', data);
+                addQuestion('Elimino', data);
             }
-            setCategoryChaosForm({ category: '', items: '' });
+            setEliminoForm({ category: '', items: '' });
         }
     };
 
@@ -75,7 +75,7 @@ export default function Admin() {
                 answer_image: q.answer_image || ''
             });
         } else {
-            setCategoryChaosForm({
+            setEliminoForm({
                 category: q.category,
                 items: Array.isArray(q.items) ? q.items.join(', ') : q.items
             });
@@ -86,7 +86,7 @@ export default function Admin() {
         setEditingId(null);
         setClueDownForm({ title: '', hints: ['', '', ''], answer: '', image: '' });
         setMindSnapForm({ question: '', question_image: '', clue: '', answer: '', answer_image: '' });
-        setCategoryChaosForm({ category: '', items: '' });
+        setEliminoForm({ category: '', items: '' });
     };
 
     const handleFileUpload = (e) => {
@@ -152,7 +152,7 @@ export default function Admin() {
                                 >
                                     <option value="ClueDown">ClueDown</option>
                                     <option value="MindSnap">MindSnap</option>
-                                    <option value="CategoryChaos">CategoryChaos</option>
+                                    <option value="Elimino">Elimino</option>
                                 </select>
                             </div>
                         </div>
@@ -304,15 +304,15 @@ export default function Admin() {
                         </form>
                     )}
 
-                    {activeGame === 'CategoryChaos' && (
-                        <form onSubmit={handleAddCategoryChaos} className="space-y-6">
+                    {activeGame === 'Elimino' && (
+                        <form onSubmit={handleAddElimino} className="space-y-6">
                             <div>
                                 <label htmlFor="cat-name" className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Category Name</label>
                                 <input
                                     id="cat-name"
                                     placeholder="e.g., Programming Languages"
-                                    value={categoryChaosForm.category}
-                                    onChange={(e) => setCategoryChaosForm({ ...categoryChaosForm, category: e.target.value })}
+                                    value={eliminoForm.category}
+                                    onChange={(e) => setEliminoForm({ ...eliminoForm, category: e.target.value })}
                                     className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
                                     required
                                 />
@@ -322,15 +322,15 @@ export default function Admin() {
                                 <textarea
                                     id="cat-items"
                                     placeholder="Comma separated: Javascript, Python, Go..."
-                                    value={categoryChaosForm.items}
-                                    onChange={(e) => setCategoryChaosForm({ ...categoryChaosForm, items: e.target.value })}
+                                    value={eliminoForm.items}
+                                    onChange={(e) => setEliminoForm({ ...eliminoForm, items: e.target.value })}
                                     className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none min-h-[100px]"
                                     required
                                 />
                             </div>
                             <div className="flex gap-4">
                                 <button className={`flex-1 ${editingId ? 'bg-blue-600 hover:bg-blue-500' : 'bg-yellow-400 hover:bg-yellow-300'} text-slate-900 py-4 rounded-xl font-black text-xl transition-all uppercase`}>
-                                    {editingId ? 'Update CategoryChaos Question' : 'Add CategoryChaos Question'}
+                                    {editingId ? 'Update Elimino Question' : 'Add Elimino Question'}
                                 </button>
                                 {editingId && (
                                     <button
