@@ -1,16 +1,55 @@
-# React + Vite
+# 🧠 Brain Buzz
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Brain Buzz is a vibrant, interactive game hub designed for home parties, team building, and logic enthusiasts. It's built with **React 19**, **Vite**, and **Tailwind CSS**, featuring a premium "glassmorphic" aesthetic and dynamic animations.
 
-Currently, two official plugins are available:
+## 🚀 Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-## React Compiler
+2. **Run Locally**:
+   ```bash
+   npm run dev
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+3. **Build for Production**:
+   ```bash
+   npm run build
+   ```
 
-## Expanding the ESLint configuration
+4. **Deploy to GitHub Pages**:
+   ```bash
+   npm run deploy
+   ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🎮 Included Games
+
+- **🔍 ClueDown**: A logic-based clue guessing game. Reveal hints one by one until you crack the answer!
+- **⚡ MindSnap**: Rapid-fire riddles and logic puzzles to test your speed.
+- **❌ Elimino**: Multiple-choice elimination. Pick the right answer from a vanishing list!
+- **🎞️ FlashTrack**: A multi-media heavy round featuring synchronized videos, audio tracks, and sequential images.
+
+## ✨ Key Features
+
+- **Split-Screen Rules**: Every game features a dedicated rules layout with an integrated question tracker.
+- **Question Tracking**: Automatic "visited" status for every question, persisted in your browser's local storage.
+- **Admin Dashboard**: A secure portal (`/admin`) to manage, edit, and bulk-import questions via JSON or CSV.
+- **GitHub Pages Ready**: Optimized with `HashRouter` and automated deployment scripts.
+
+## 🛠️ Admin Access
+
+Access the Admin Panel at `/admin`.
+- **Default PIN**: `1234`
+
+## 📦 Tech Stack
+
+- **React 19**
+- **Vite**
+- **Tailwind CSS**
+- **Canvas Confetti**
+- **React Router 7**
+
+---
+Built with ❤️ for quiz lovers.
