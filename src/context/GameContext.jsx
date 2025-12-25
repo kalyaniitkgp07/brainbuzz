@@ -28,7 +28,7 @@ export function GameProvider({ children }) {
 
     const [enabledGames, setEnabledGames] = useState(() => {
         const saved = localStorage.getItem('bb_enabled_games');
-        return saved ? JSON.parse(saved) : ["ClueDown"]; // Default to just ClueDown
+        return saved ? JSON.parse(saved) : ALL_GAMES; // Default to all games
     });
 
     const [visitedQuestions, setVisitedQuestions] = useState(() => {
