@@ -147,11 +147,19 @@ export default function MindSnap() {
                             </h1>
 
                             {currentQuestion.answer_image && (
-                                <img
-                                    src={currentQuestion.answer_image}
-                                    alt={currentQuestion.answer}
-                                    className="max-h-80 rounded-3xl shadow-inner border-4 border-white/10 mb-8 object-contain"
-                                />
+                                <div className="w-full max-w-2xl h-80 relative overflow-hidden rounded-[40px] shadow-2xl border-4 border-white/10 mb-8 flex items-center justify-center bg-slate-900/50">
+                                    {/* Blurred Background Layer */}
+                                    <div
+                                        className="absolute inset-0 bg-cover bg-center blur-2xl opacity-30 scale-110"
+                                        style={{ backgroundImage: `url(${currentQuestion.answer_image})` }}
+                                    />
+                                    {/* Main Sharp Image */}
+                                    <img
+                                        src={currentQuestion.answer_image}
+                                        alt={currentQuestion.answer}
+                                        className="relative z-10 max-w-full max-h-full object-contain"
+                                    />
+                                </div>
                             )}
                         </div>
 

@@ -154,11 +154,19 @@ export default function ClueDown() {
                         <h1 className="text-6xl font-black text-slate-900 mb-8 relative z-10 drop-shadow-sm uppercase">{currentQuestion.answer}</h1>
 
                         {currentQuestion.image && (
-                            <img
-                                src={currentQuestion.image}
-                                alt={currentQuestion.answer}
-                                className="w-full h-80 object-cover rounded-2xl shadow-inner mb-8 relative z-10 border-4 border-slate-100"
-                            />
+                            <div className="w-full h-80 relative overflow-hidden rounded-2xl shadow-inner mb-8 border-4 border-slate-100 flex items-center justify-center bg-slate-100">
+                                {/* Blurred Background Layer */}
+                                <div
+                                    className="absolute inset-0 bg-cover bg-center blur-2xl opacity-30 scale-110"
+                                    style={{ backgroundImage: `url(${currentQuestion.image})` }}
+                                />
+                                {/* Main Sharp Image */}
+                                <img
+                                    src={currentQuestion.image}
+                                    alt={currentQuestion.answer}
+                                    className="relative z-10 max-w-full max-h-full object-contain"
+                                />
+                            </div>
                         )}
 
                         <div className="flex gap-4 relative z-10 w-full">

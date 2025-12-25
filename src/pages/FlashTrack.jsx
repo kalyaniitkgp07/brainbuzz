@@ -12,6 +12,7 @@ export default function FlashTrack() {
 
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [visibleImages, setVisibleImages] = useState([]);
     const [mediaDuration, setMediaDuration] = useState(0);
 
@@ -52,7 +53,17 @@ export default function FlashTrack() {
         return () => timers.forEach(clearTimeout);
     }, [isPlaying, currentQuestion, mediaDuration]);
 
+    useEffect(() => {
+        if (isModalOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [isModalOpen]);
+
     const handleStart = () => {
+        setIsModalOpen(true);
         setIsPlaying(true);
         setVisibleImages([]);
 
@@ -65,6 +76,13 @@ export default function FlashTrack() {
             audioRef.current.playbackRate = currentQuestion.audioSpeed || 1;
             audioRef.current.play();
         }
+    };
+
+    const handleStop = () => {
+        setIsPlaying(false);
+        setIsModalOpen(false);
+        if (videoRef.current) videoRef.current.pause();
+        if (audioRef.current) audioRef.current.pause();
     };
 
     const getAnswerTextSize = (text, hasImage) => {
@@ -141,62 +159,29 @@ export default function FlashTrack() {
                 {/* Left Column: Media Container */}
                 <div className="space-y-6">
                     <div className="relative aspect-video bg-slate-900 rounded-[40px] overflow-hidden border-2 border-slate-800 shadow-2xl group">
-                        {!isPlaying ? (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm z-20">
-                                <button
-                                    onClick={handleStart}
-                                    className="bg-yellow-400 hover:bg-yellow-300 text-slate-900 p-10 rounded-full font-black text-4xl shadow-2xl transition-all hover:scale-110 flex items-center justify-center group"
-                                >
-                                    <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                                </button>
-                                <p className="mt-6 text-slate-400 font-black uppercase tracking-widest">Click to Start Media</p>
-                            </div>
-                        ) : (
-                            <>
-                                {visibleImages.length > 0 && (
-                                    <div className="absolute inset-0 z-10 p-4 grid grid-cols-2 md:grid-cols-3 gap-4 pointer-events-none">
-                                        {visibleImages.map((img, i) => (
-                                            <img
-                                                key={i}
-                                                src={img}
-                                                alt=""
-                                                className="w-full h-full object-cover rounded-2xl animate-in fade-in zoom-in duration-500 border-2 border-white/20"
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-                                {visibleImages.length === 0 && !currentQuestion.videoUrl && currentQuestion.audioUrl && (
-                                    <div className="absolute inset-0 flex items-center justify-center z-10">
-                                        <div className="flex gap-1 items-end h-20">
-                                            {[...Array(5)].map((_, i) => (
-                                                <div
-                                                    key={i}
-                                                    className="w-3 bg-yellow-400 rounded-full animate-bounce"
-                                                    style={{ animationDelay: `${i * 0.1}s`, height: `${Math.random() * 100}%` }}
-                                                />
-                                            ))}
-                                        </div>
-                                        <p className="absolute bottom-10 text-slate-400 font-black uppercase tracking-widest animate-pulse">Playing Audio...</p>
-                                    </div>
-                                )}
-                            </>
-                        )}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm z-20">
+                            <button
+                                onClick={handleStart}
+                                className="bg-yellow-400 hover:bg-yellow-300 text-slate-900 p-10 rounded-full font-black text-4xl shadow-2xl transition-all hover:scale-110 flex items-center justify-center group"
+                            >
+                                <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                            </button>
+                            <p className="mt-6 text-slate-400 font-black uppercase tracking-widest">Click to Start Media</p>
+                        </div>
 
-                        {currentQuestion.videoUrl && (
-                            <video
-                                ref={videoRef}
-                                src={currentQuestion.videoUrl}
-                                className="w-full h-full object-cover"
-                                onLoadedMetadata={onMediaLoaded}
-                            />
-                        )}
-                        {currentQuestion.audioUrl && (
-                            <audio
-                                ref={audioRef}
-                                src={currentQuestion.audioUrl}
-                                onLoadedMetadata={onMediaLoaded}
-                            />
-                        )}
+                        {/* Hidden Media Elements (for metadata & control) */}
+                        <div className="hidden">
+                            {currentQuestion.videoUrl && (
+                                <video
+                                    src={currentQuestion.videoUrl}
+                                />
+                            )}
+                            {currentQuestion.audioUrl && (
+                                <audio
+                                    src={currentQuestion.audioUrl}
+                                />
+                            )}
+                        </div>
                     </div>
 
                     {isQuestion && (
@@ -222,9 +207,20 @@ export default function FlashTrack() {
                         </div>
 
                         {currentQuestion.answerImage && (
-                            <div className="relative group">
+                            <div className="relative group w-full max-w-2xl mx-auto h-72 overflow-hidden rounded-[30px] border-4 border-yellow-400 shadow-2xl bg-white/5 flex items-center justify-center">
+                                {/* Blurred Background Layer */}
+                                <div
+                                    className="absolute inset-0 bg-cover bg-center blur-2xl opacity-40 scale-110"
+                                    style={{ backgroundImage: `url(${currentQuestion.answerImage})` }}
+                                />
+                                {/* Glow Effect Background */}
                                 <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-[32px] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                                <img src={currentQuestion.answerImage} alt="Answer" className="relative max-h-72 mx-auto rounded-[30px] border-4 border-yellow-400 shadow-2xl object-cover" />
+                                {/* Main Sharp Image */}
+                                <img
+                                    src={currentQuestion.answerImage}
+                                    alt="Answer"
+                                    className="relative z-10 max-w-full max-h-full object-contain"
+                                />
                             </div>
                         )}
 
@@ -239,6 +235,109 @@ export default function FlashTrack() {
                     </div>
                 )}
             </div>
+            {/* MEDIA MODAL */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center p-8 animate-in fade-in zoom-in duration-300">
+                    {/* Background Blur Effect */}
+                    <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-2xl" />
+
+                    {/* Top Bar */}
+                    <div className="absolute top-0 left-0 w-full p-8 flex justify-between items-center z-10">
+                        <div className="flex flex-col">
+                            <span className="text-yellow-400 font-black uppercase tracking-[0.3em] text-sm mb-1">{currentQuestion.type}</span>
+                            <h2 className="text-3xl font-black text-white uppercase tracking-tight">{currentQuestion.title}</h2>
+                        </div>
+                        <button
+                            onClick={handleStop}
+                            className="bg-white/10 hover:bg-white/20 text-white p-4 rounded-full transition-all hover:rotate-90"
+                        >
+                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+
+                    {/* Content Container */}
+                    <div className="relative w-full max-w-7xl aspect-video bg-black/40 rounded-[40px] overflow-hidden border-2 border-white/5 shadow-[0_0_100px_rgba(0,0,0,0.5)] flex items-center justify-center group">
+                        {/* Video Layer */}
+                        {currentQuestion.videoUrl && (
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                src={currentQuestion.videoUrl}
+                                className="w-full h-full object-contain"
+                                onLoadedMetadata={onMediaLoaded}
+                                onEnded={handleStop}
+                                muted={currentQuestion.videoMuted || false}
+                            />
+                        )}
+
+                        {/* Audio Visualizer Layer */}
+                        {!currentQuestion.videoUrl && currentQuestion.audioUrl && (
+                            <div className="flex flex-col items-center gap-12">
+                                <audio
+                                    ref={audioRef}
+                                    autoPlay
+                                    src={currentQuestion.audioUrl}
+                                    onLoadedMetadata={onMediaLoaded}
+                                    onEnded={handleStop}
+                                />
+                                <div className="flex gap-3 items-end h-48">
+                                    {[...Array(12)].map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="w-4 bg-yellow-400 rounded-full animate-bounce shadow-[0_0_20px_rgba(251,191,36,0.3)]"
+                                            style={{ animationDelay: `${i * 0.05}s`, height: `${40 + Math.random() * 60}%` }}
+                                        />
+                                    ))}
+                                </div>
+                                <div className="text-center space-y-4">
+                                    <div className="flex items-center gap-3 justify-center">
+                                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                                        <span className="text-slate-400 font-black uppercase tracking-[0.5em] text-lg">Live Audio Playback</span>
+                                    </div>
+                                    <p className="text-white/20 text-sm font-bold uppercase tracking-widest">Listen Carefully for Clues</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Image Overlay Grid */}
+                        {visibleImages.length > 0 && (
+                            <div className="absolute inset-0 z-10 p-8 grid grid-cols-2 md:grid-cols-3 gap-6 pointer-events-none">
+                                {visibleImages.map((img, i) => (
+                                    <div key={i} className="relative group/img animate-in fade-in zoom-in duration-700">
+                                        <div className="absolute -inset-1 bg-white/20 blur opacity-25 rounded-3xl" />
+                                        <img
+                                            src={img}
+                                            alt=""
+                                            className="relative w-full h-full object-cover rounded-3xl border-2 border-white/20 shadow-2xl"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Bottom Action Bar */}
+                    <div className="absolute bottom-12 flex flex-col items-center gap-6 z-10">
+                        <div className="flex gap-4">
+                            <button
+                                onClick={handleStop}
+                                className="bg-red-500/20 hover:bg-red-500/40 text-red-500 px-10 py-4 rounded-2xl font-black text-xl border-2 border-red-500/30 transition-all active:scale-95 uppercase tracking-widest"
+                            >
+                                Stop Round
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleStop();
+                                    navigate(`/flashtrack/answer/${currentQuestion.id}`);
+                                }}
+                                className="bg-green-500 hover:bg-green-400 text-white px-12 py-4 rounded-2xl font-black text-2xl shadow-[0_0_30px_rgba(34,197,94,0.3)] transition-all active:scale-95 uppercase tracking-tighter"
+                            >
+                                Reveal Answer →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
