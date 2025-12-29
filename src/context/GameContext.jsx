@@ -3,7 +3,7 @@ import { QUESTIONS as defaultClueDownQuestions, MIND_SNAP_QUESTIONS as defaultMi
 
 const GameContext = createContext();
 
-export const ALL_GAMES = ["ClueDown", "MindSnap", "Elimino", "FlashTrack"];
+export const ALL_GAMES = ["ClueDown", "Elimino", "MindSnap", "FlashTrack"];
 
 export function GameProvider({ children }) {
     const [questions, setQuestions] = useState(() => {

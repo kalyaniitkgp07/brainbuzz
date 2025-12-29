@@ -26,7 +26,7 @@ export default function Header() {
                         to="/"
                         className="bg-yellow-400 text-slate-900 px-6 py-2 rounded-full font-bold hover:bg-yellow-300 transition-colors flex items-center gap-2"
                     >
-                        🏠 Home
+                        🎮 Lobby
                     </Link>
                 )}
             </div>

@@ -157,7 +157,7 @@ export default function ClueDown() {
                             <div className="w-full h-80 relative overflow-hidden rounded-2xl shadow-inner mb-8 border-4 border-slate-100 flex items-center justify-center bg-slate-100">
                                 {/* Blurred Background Layer */}
                                 <div
-                                    className="absolute inset-0 bg-cover bg-center blur-2xl opacity-30 scale-110"
+                                    className="absolute inset-0 bg-cover bg-center blur-2xl scale-110"
                                     style={{ backgroundImage: `url(${currentQuestion.image})` }}
                                 />
                                 {/* Main Sharp Image */}

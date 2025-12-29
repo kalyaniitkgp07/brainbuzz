@@ -122,13 +122,11 @@ export default function Elimino() {
                     <div className="bg-slate-800 p-12 rounded-[40px] shadow-2xl border-b-8 border-purple-500 flex flex-col justify-between">
                         <div>
                             <h2 className="text-5xl font-black mb-8 text-purple-400 uppercase tracking-tight">Rules: Elimino</h2>
-                            <div className="text-2xl mb-12 text-slate-300 space-y-6">
-                                <p>Pick the correct answer from four options!</p>
-                                <ul className="text-left max-w-md mx-auto space-y-4 bg-slate-900/50 p-6 rounded-2xl border-2 border-slate-700">
-                                    <li>💡 <span className="text-white font-bold">50/50:</span> You can eliminate two wrong options if you're stuck.</li>
-                                    <li>🏆 <span className="text-green-400 font-bold">Goal:</span> Identify the one true answer.</li>
-                                </ul>
-                            </div>
+                            <ul className="text-2xl space-y-6 mb-12">
+                                <li>🎯 <span className="text-purple-400 font-bold">Goal:</span> Pick the correct answer from 4 options.</li>
+                                <li>🏆 <span className="text-green-400 font-bold">20 pts:</span> Original 4 options</li>
+                                <li>🏆 <span className="text-blue-400 font-bold">10 pts:</span> After using 50/50</li>
+                            </ul>
                         </div>
                         <button
                             onClick={() => showQuestion(0)}
