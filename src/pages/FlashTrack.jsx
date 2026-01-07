@@ -13,7 +13,9 @@ export default function FlashTrack() {
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAudioPaused, setIsAudioPaused] = useState(false);
     const [visibleImages, setVisibleImages] = useState([]);
+    const [visibleEmojis, setVisibleEmojis] = useState([]);
     const [mediaDuration, setMediaDuration] = useState(0);
 
     const videoRef = useRef(null);
@@ -35,20 +37,31 @@ export default function FlashTrack() {
         }
     }, [id, QUESTIONS, isQuestion]);
 
-    // Handle reveal logic
+    // Handle reveal logic for images and emojis
     useEffect(() => {
         let timers = [];
-        if (isPlaying && currentQuestion.images?.length > 0) {
-            const count = currentQuestion.images.length;
-            // If duration is known, space them out. If not, reveal first one immediately.
-            const interval = mediaDuration > 0 ? (mediaDuration * 1000) / count : 1000;
+        if (isPlaying) {
+            const images = currentQuestion.images || [];
+            const emojis = currentQuestion.emojis || [];
+            const totalItems = images.length + emojis.length;
 
-            currentQuestion.images.forEach((img, idx) => {
-                const timer = setTimeout(() => {
-                    setVisibleImages(prev => [...new Set([...prev, img])]);
-                }, idx * interval);
-                timers.push(timer);
-            });
+            if (totalItems > 0) {
+                const interval = mediaDuration > 0 ? (mediaDuration * 1000) / totalItems : 1000;
+
+                images.forEach((img, idx) => {
+                    const timer = setTimeout(() => {
+                        setVisibleImages(prev => [...new Set([...prev, img])]);
+                    }, idx * interval);
+                    timers.push(timer);
+                });
+
+                emojis.forEach((emoji, idx) => {
+                    const timer = setTimeout(() => {
+                        setVisibleEmojis(prev => [...new Set([...prev, emoji])]);
+                    }, (images.length + idx) * interval);
+                    timers.push(timer);
+                });
+            }
         }
         return () => timers.forEach(clearTimeout);
     }, [isPlaying, currentQuestion, mediaDuration]);
@@ -62,10 +75,17 @@ export default function FlashTrack() {
         return () => { document.body.style.overflow = 'unset'; };
     }, [isModalOpen]);
 
+    useEffect(() => {
+        if (isModalOpen && audioRef.current && currentQuestion.audioSpeed) {
+            audioRef.current.playbackRate = currentQuestion.audioSpeed;
+        }
+    }, [isModalOpen, currentQuestion.audioSpeed]);
+
     const handleStart = () => {
         setIsModalOpen(true);
         setIsPlaying(true);
         setVisibleImages([]);
+        setVisibleEmojis([]);
 
         if (videoRef.current) {
             videoRef.current.playbackRate = currentQuestion.videoSpeed || 1;
@@ -83,6 +103,18 @@ export default function FlashTrack() {
         setIsModalOpen(false);
         if (videoRef.current) videoRef.current.pause();
         if (audioRef.current) audioRef.current.pause();
+    };
+
+    const toggleAudioPlayback = () => {
+        if (audioRef.current) {
+            if (isAudioPaused) {
+                audioRef.current.play();
+                setIsAudioPaused(false);
+            } else {
+                audioRef.current.pause();
+                setIsAudioPaused(true);
+            }
+        }
     };
 
     const getAnswerTextSize = (text, hasImage) => {
@@ -146,7 +178,7 @@ export default function FlashTrack() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8 p-4">
+        <div className="w-full mx-auto space-y-8 p-4">
             {/* Type Header */}
             <div className="text-center">
                 <span className="bg-yellow-400/10 text-yellow-400 px-6 py-2 rounded-full text-sm font-black uppercase tracking-widest border border-yellow-400/20">
@@ -265,51 +297,82 @@ export default function FlashTrack() {
                                 src={currentQuestion.videoUrl}
                                 className="w-full h-full object-contain"
                                 onLoadedMetadata={onMediaLoaded}
-                                onEnded={handleStop}
                                 muted={currentQuestion.videoMuted || false}
+                            />
+                        )}
+
+                        {/* Single Image Layer (when no video) */}
+                        {!currentQuestion.videoUrl && currentQuestion.imageUrl && (
+                            <img
+                                src={currentQuestion.imageUrl}
+                                alt="Question"
+                                className="w-full h-full object-contain"
+                                onLoad={onMediaLoaded}
                             />
                         )}
 
                         {/* Audio Visualizer Layer */}
                         {!currentQuestion.videoUrl && currentQuestion.audioUrl && (
-                            <div className="flex flex-col items-center gap-12">
+                            <div className="relative flex flex-col items-center gap-8">
                                 <audio
                                     ref={audioRef}
                                     autoPlay
                                     src={currentQuestion.audioUrl}
                                     onLoadedMetadata={onMediaLoaded}
-                                    onEnded={handleStop}
                                 />
-                                <div className="flex gap-3 items-end h-48">
-                                    {[...Array(12)].map((_, i) => (
+                                {/* Subtle Visualizer */}
+                                <div className="flex gap-2 items-end h-24">
+                                    {[...Array(8)].map((_, i) => (
                                         <div
                                             key={i}
-                                            className="w-4 bg-yellow-400 rounded-full animate-bounce shadow-[0_0_20px_rgba(251,191,36,0.3)]"
+                                            className="w-2 bg-yellow-400/60 rounded-full animate-bounce shadow-[0_0_10px_rgba(251,191,36,0.15)]"
                                             style={{ animationDelay: `${i * 0.05}s`, height: `${40 + Math.random() * 60}%` }}
                                         />
                                     ))}
                                 </div>
-                                <div className="text-center space-y-4">
-                                    <div className="flex items-center gap-3 justify-center">
-                                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                                        <span className="text-slate-400 font-black uppercase tracking-[0.5em] text-lg">Live Audio Playback</span>
+                                {/* Status Text */}
+                                <div className="text-center space-y-2">
+                                    <div className="flex items-center gap-2 justify-center">
+                                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                                        <span className="text-slate-400 font-bold uppercase tracking-[0.3em] text-sm">Audio Playing</span>
                                     </div>
-                                    <p className="text-white/20 text-sm font-bold uppercase tracking-widest">Listen Carefully for Clues</p>
+                                    <p className="text-white/20 text-xs font-bold uppercase tracking-widest">Listen Carefully</p>
                                 </div>
+                                {/* Play/Pause Button */}
+                                <button
+                                    onClick={toggleAudioPlayback}
+                                    className="absolute bottom-4 right-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm p-3 rounded-full transition-all border border-white/20"
+                                    title={isAudioPaused ? "Play Audio" : "Pause Audio"}
+                                >
+                                    {isAudioPaused ? (
+                                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
+                                    ) : (
+                                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                                        </svg>
+                                    )}
+                                </button>
                             </div>
                         )}
 
-                        {/* Image Overlay Grid */}
-                        {visibleImages.length > 0 && (
+                        {/* Image and Emoji Overlay Grid */}
+                        {(visibleImages.length > 0 || visibleEmojis.length > 0) && (
                             <div className="absolute inset-0 z-10 p-8 grid grid-cols-2 md:grid-cols-3 gap-6 pointer-events-none">
                                 {visibleImages.map((img, i) => (
-                                    <div key={i} className="relative group/img animate-in fade-in zoom-in duration-700">
+                                    <div key={`img-${i}`} className="relative group/img animate-in fade-in zoom-in duration-700">
                                         <div className="absolute -inset-1 bg-white/20 blur opacity-25 rounded-3xl" />
                                         <img
                                             src={img}
                                             alt=""
                                             className="relative w-full h-full object-cover rounded-3xl border-2 border-white/20 shadow-2xl"
                                         />
+                                    </div>
+                                ))}
+                                {visibleEmojis.map((emoji, i) => (
+                                    <div key={`emoji-${i}`} className="relative flex items-center justify-center bg-slate-900/80 backdrop-blur-sm rounded-3xl border-2 border-yellow-400/30 shadow-2xl animate-in fade-in zoom-in duration-700">
+                                        <span className="text-8xl">{emoji}</span>
                                     </div>
                                 ))}
                             </div>

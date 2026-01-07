@@ -13,7 +13,9 @@ export default function Admin() {
     const [flashTrackForm, setFlashTrackForm] = useState({
         type: 'MacroMatch',
         title: '',
+        emojis: '',
         images: '',
+        imageUrl: '',
         videoUrl: '',
         audioUrl: '',
         answer: '',
@@ -74,16 +76,17 @@ export default function Admin() {
     const handleAddFlashTrack = (e) => {
         e.preventDefault();
 
-        const hasMedia = flashTrackForm.images.trim() || flashTrackForm.videoUrl.trim() || flashTrackForm.audioUrl.trim();
+        const hasMedia = flashTrackForm.emojis.trim() || flashTrackForm.images.trim() || flashTrackForm.imageUrl.trim() || flashTrackForm.videoUrl.trim() || flashTrackForm.audioUrl.trim();
 
         if (!hasMedia) {
-            alert("Please provide at least one media source: Images, Video URL, or Audio URL.");
+            alert("Please provide at least one media source: Emojis, Images, Image URL, Video URL, or Audio URL.");
             return;
         }
 
         if (flashTrackForm.title && flashTrackForm.answer) {
             const data = {
                 ...flashTrackForm,
+                emojis: flashTrackForm.emojis ? flashTrackForm.emojis.split(',').map(s => s.trim()).filter(s => s) : [],
                 images: flashTrackForm.images ? flashTrackForm.images.split(',').map(s => s.trim()).filter(s => s) : [],
                 audioSpeed: parseFloat(flashTrackForm.audioSpeed) || 1,
                 videoSpeed: parseFloat(flashTrackForm.videoSpeed) || 1
@@ -96,7 +99,7 @@ export default function Admin() {
                 addQuestion('FlashTrack', data);
             }
             setFlashTrackForm({
-                type: 'MacroMatch', title: '', images: '', videoUrl: '', audioUrl: '',
+                type: 'MacroMatch', title: '', emojis: '', images: '', imageUrl: '', videoUrl: '', audioUrl: '',
                 answer: '', answerImage: '', audioSpeed: '1', videoSpeed: '1', videoMuted: false
             });
         }
@@ -130,7 +133,9 @@ export default function Admin() {
             setFlashTrackForm({
                 type: q.type || 'MacroMatch',
                 title: q.title || '',
+                emojis: Array.isArray(q.emojis) ? q.emojis.join(', ') : (q.emojis || ''),
                 images: Array.isArray(q.images) ? q.images.join(', ') : (q.images || ''),
+                imageUrl: q.imageUrl || '',
                 videoUrl: q.videoUrl || '',
                 audioUrl: q.audioUrl || '',
                 answer: q.answer,
@@ -148,7 +153,7 @@ export default function Admin() {
         setMindSnapForm({ question: '', question_image: '', clue: '', answer: '', answer_image: '' });
         setEliminoForm({ question: '', options: ['', '', '', ''], answer: '', eliminated: '' });
         setFlashTrackForm({
-            type: 'MacroMatch', title: '', images: '', videoUrl: '', audioUrl: '',
+            type: 'MacroMatch', title: '', emojis: '', images: '', imageUrl: '', videoUrl: '', audioUrl: '',
             answer: '', answerImage: '', audioSpeed: '1', videoSpeed: '1', videoMuted: false
         });
     };
@@ -163,8 +168,9 @@ export default function Admin() {
                 const data = JSON.parse(event.target.result);
                 if (!Array.isArray(data)) throw new Error("JSON must be an array of questions.");
 
-                // Final validation could be added here based on activeGame
-                bulkAddQuestions(activeGame, data);
+                // Strip 'id' key if present to let the app manage IDs sequentially
+                const sanitizedData = data.map(({ id, ...rest }) => rest);
+                bulkAddQuestions(activeGame, sanitizedData);
             } catch (err) {
                 alert("Failed to load JSON: " + err.message);
             }
@@ -470,12 +476,32 @@ export default function Admin() {
                             </div>
 
                             <div>
+                                <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Emojis (Comma separated)</label>
+                                <textarea
+                                    placeholder="🍎, 🍌, 🍒..."
+                                    value={flashTrackForm.emojis}
+                                    onChange={(e) => setFlashTrackForm({ ...flashTrackForm, emojis: e.target.value })}
+                                    className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none min-h-[60px]"
+                                />
+                            </div>
+
+                            <div>
                                 <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Images (Comma separated URLs)</label>
                                 <textarea
                                     placeholder="image1.jpg, image2.jpg..."
                                     value={flashTrackForm.images}
                                     onChange={(e) => setFlashTrackForm({ ...flashTrackForm, images: e.target.value })}
                                     className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none min-h-[60px]"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-slate-400 text-xs font-black uppercase mb-2 ml-1">Single Image URL (Optional)</label>
+                                <input
+                                    placeholder="https://example.com/image.jpg"
+                                    value={flashTrackForm.imageUrl}
+                                    onChange={(e) => setFlashTrackForm({ ...flashTrackForm, imageUrl: e.target.value })}
+                                    className="w-full bg-slate-900 p-4 rounded-xl border-2 border-slate-700 focus:border-yellow-400 outline-none"
                                 />
                             </div>
 
